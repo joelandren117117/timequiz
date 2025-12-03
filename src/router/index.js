@@ -10,32 +10,32 @@ const router = createRouter({
       component: HomeView,
     },
     {
-      path: '/poll/:id',
+      path: '/poll',
       name: 'PlayView',  // you may rename based on your logic
       component: () => import('../views/PlayView.vue'),
     },
     {
-      path: '/lobby/:id',
+      path: '/lobby',
       name: 'LobbyView',
       component: () => import('../views/LobbyView.vue'),
     },
     {
-      path: '/create/',
+      path: '/create',
       name: 'CreateQuizView',
       component: () => import('../views/CreateQuizView.vue'),
     },
     {
-      path: '/result/:id',
+      path: '/result',
       name: 'ResultView',
       component: () => import('../views/ResultView.vue'),
     },
     {
-      path: '/game/:id',
+      path: '/game',
       name: 'GameView',
       component: () => import('../views/GameView.vue'),
     },
     {
-      path: '/host/:id',
+      path: '/host',
       name: 'HostView',
       component: () => import('../views/HostView.vue'),
     }
