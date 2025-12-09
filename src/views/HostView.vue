@@ -3,16 +3,18 @@
     <div v-bind:class="['hamburger', { 'close': !hideNav }]" v-on:click="toggleNav">
     </div>
     <div class="logo">
-      <img src="/img/logo.png">
-      Polly polling tool
+      <img src="/quizpic.png">
+      Timequiz
       <img src="../assets/logo.svg">
     </div>
   </header>
+
+  <!--meny från micke-->
   <ResponsiveNav v-bind:hideNav="hideNav">
     <button v-on:click="switchLanguage">
       {{ uiLabels.changeLanguage }}
     </button>
-    <router-link to="/create/">
+    <router-link to="/create/"> 
       {{ uiLabels.createPoll }}
     </router-link>
     <a href="">
@@ -20,7 +22,9 @@
     </a>
     <a href="">FAQ</a>
   </ResponsiveNav>
-  <h1>{{ uiLabels["sales-pitch"] }}</h1>
+  <!--meny från micke-->
+
+ <!-- <h1>{{ uiLabels.heading }}</h1>
   <h2>{{ uiLabels.subHeading }}</h2>
   <label>
     Write poll id:
@@ -28,7 +32,45 @@
   </label>
   <router-link v-bind:to="'/lobby/' + newPollId">
     {{ uiLabels.participatePoll }}
-  </router-link>
+  </router-link> -->
+
+  <section class="hostMenu">
+    <button class="button">
+      Previous Question
+    </button>
+    
+    <button class="button">
+      Edit players
+    </button>
+
+    <button class="button">
+      Back to menu
+    </button>
+
+    <button class="button">
+      Next Question
+    </button>
+
+  </section>
+    
+  <main class="layout">
+    <!-- Vänster panel: deltagare -->
+    <aside class="sidebar">
+        <h2>Deltagare</h2>
+        <ul class="players">
+            <li v-for="player in players" :key="player.name">
+                <span class="pname">{{ player.name }}</span>
+                <span class="pscore">{{ player.score }} poäng</span>
+            </li>
+        </ul>
+    </aside>
+
+    <section class="map-container">
+        <h2>Karta</h2>
+        <div id="map"></div>
+    </section>
+</main>
+
 </template>
 
 <script>
@@ -46,7 +88,14 @@ export default {
       uiLabels: {},
       newPollId: "",
       lang: localStorage.getItem("lang") || "en",
-      hideNav: true
+      hideNav: true,
+        players: [
+    { name: "David", score: 1000000000 },
+    { name: "Elliot", score: 0 },
+    { name: "Joel", score: 1 },
+    { name: "Jonna", score: 3 },
+    { name: "Alexander", score: -5 }
+  ]
     }
   },
   created: function () {
@@ -126,4 +175,84 @@ header {
     left: -12em;
   }
 }
+
+.hostMenu{
+  display: flex;
+  gap: 2em;
+  padding: 2em;
+  justify-content: center;
+  align-items: center;
+}
+
+.button{
+  height: 7em;
+  width: 10em;
+  border-radius: 1em;
+}
+
+
+/* === Layouten runt kartan och deltagare === */
+.layout {
+    display: grid;
+    grid-template-columns: 27% 1fr;
+    gap: 2em;
+    padding: 2em;
+}
+
+/* === Vänster sida: deltagare === */
+.sidebar {
+    background: lightblue;
+    padding: 2em;
+    border-radius: 1em;
+}
+
+.players {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.players li {
+    display: flex;
+    justify-content: space-between;
+    background: white;
+    padding: 1em;
+    margin-bottom: 1em;
+    border-radius: 1em;
+    border: 0.1em solid lightgray;
+}
+
+.pname {
+    font-weight: bold;
+}
+
+.pscore {
+    color: black;
+}
+
+/* === Höger sida: karta === */
+.map-container {
+    background: lightblue;
+    padding: 1em;
+    border-radius: 1em;
+}
+
+#map {
+    width: 100%;
+    height: 30em;
+    background: red;
+    border-radius: 1em;
+}
+
+/* Responsiv fix */
+@media (max-width: 60em) {
+    .layout {
+        grid-template-columns: 1fr;
+    }
+
+    #map {
+        height: 30em;
+    }
+}
+
 </style>
