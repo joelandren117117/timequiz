@@ -59,8 +59,8 @@
         <h2>Deltagare</h2>
         <ul class="players">
             <li v-for="player in players" :key="player.name">
-                <span class="pname">{{ player.name }}</span>
-                <span class="pscore">{{ player.score }} poäng</span>
+                <span class="pname">{{ player.namn }}</span>
+                <span class="pscore">{{ player.points }} poäng</span>
             </li>
         </ul>
     </aside>
@@ -83,19 +83,17 @@ export default {
   components: {
     ResponsiveNav
   },
-  data: function () {
+  data() {
     return {
       uiLabels: {},
       newPollId: "",
-      lang: localStorage.getItem("lang") || "en",
       hideNav: true,
-        players: [
-    { name: "David", score: 1000000000 },
-    { name: "Elliot", score: 0 },
-    { name: "Joel", score: 1 },
-    { name: "Jonna", score: 3 },
-    { name: "Alexander", score: -5 }
-  ]
+      lang: localStorage.getItem("lang") || "en",
+      players: [
+        {id: 1, namn: "Alexander", ready: true, points: 100000},
+        {id: 2, namn: "David", ready: true, points: 5},
+        {id: 3, namn: "Elliot", ready: true, points: -3}
+      ]
     }
   },
   created: function () {
@@ -116,6 +114,9 @@ export default {
     toggleNav: function () {
       this.hideNav = !this.hideNav;
     }
+  },
+    mounted() {
+    this.players.sort((a, b) => b.points - a.points)
   }
 }
 </script>
