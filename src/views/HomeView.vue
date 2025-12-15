@@ -9,7 +9,7 @@
           </header>
   
           <div class="action-buttons">
-              <p class="tagline">Guess time &amp; place — Challenge your friends!</p>
+              <p class="tagline">Guess time &amp; place: Challenge your friends!</p>
   
               <RouterLink to="/play" class="button-link">
                   <button class="action-btn primary-action-btn">
@@ -31,14 +31,13 @@
   .home-container {
       background-color: #FEFCEF;
       min-height: 100vh;
-      padding: 3rem 2rem;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       color: #1D1C1B;
   
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: cente
+      justify-content: center;
   }    
   
   .app-header {
@@ -58,6 +57,8 @@
       font-size: 1.4rem;
       color: #1D1C1B;
       margin-bottom: 2.5rem;
+      white-space: nowrap;
+      align-self: center;
   }
   
   .action-buttons {

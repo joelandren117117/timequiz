@@ -29,7 +29,7 @@
                       :class="{ 'active-mode': currentMode === 'host' }"
                       class="mode-btn"
                   >
-                      Create and Host
+                      Host Lobby
                   </button>
               </div>
   
