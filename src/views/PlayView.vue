@@ -2,6 +2,7 @@
   import { ref } from 'vue';
   import JoinLobbyForm from '@/components/JoinLobbyForm.vue';
   import QuizList from '@/components/QuizList.vue';
+  import { RouterLink } from 'vue-router';
   
   const currentMode = ref('join'); 
   </script>
@@ -29,7 +30,7 @@
                       :class="{ 'active-mode': currentMode === 'host' }"
                       class="mode-btn"
                   >
-                      Create and Host
+                      Host Lobby
                   </button>
               </div>
   
@@ -42,6 +43,11 @@
                   <div v-else-if="currentMode === 'host'">
                       <p class="description-text">Choose a quiz from the list below to create a new lobby:</p>
                       <QuizList />
+                        <RouterLink to="/lobby" class="button-link">
+                            <button class="action-btn primary-action-btn">
+                                Create Lobby
+                            </button>
+                        </RouterLink>
                   </div>
               </div>
           </section>
