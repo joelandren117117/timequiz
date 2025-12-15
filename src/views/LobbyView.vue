@@ -32,15 +32,16 @@ const socket = io("localhost:3000");
 export default {
   name: 'Lobbyview',
 
-  data: function () {
+  data() {
     return {
       players: [
-        {id: 1, namn: "Alexander", ready: true},
-        {id: 2, namn: "David", ready: false}
+        {id: 1, namn: "Alexander", ready: true, points: 2},
+        {id: 2, namn: "David", ready: true, points: 5},
+        {id: 3, namn: "Elliot", ready: true, points: 3}
       ]
     }
   },
-  created: function () {
+  created() {
     this.pollId = this.$route.params.id;
     socket.on( "questionUpdate", q => this.question = q );
     socket.on( "submittedAnswersUpdate", answers => this.submittedAnswers = answers );
