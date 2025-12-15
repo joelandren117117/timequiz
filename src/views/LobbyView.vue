@@ -4,19 +4,17 @@
     <div id="maindiv">
     
       <h1>Game Lobby</h1>
+      <h1>{{lobbyID}}</h1>
   
-      <div class="playerbox" v-for="player in players" :key="player.id">
-        {{ player.namn }} - {{ player.ready ? 'Ready' : 'Not Ready' }} <!-- Frågetecken är som en if-else-->
+      <div class="playerbox" v-for="player in nonHostPlayers" :key="player.id">
+          {{ player.namn }} - {{ player.ready ? 'Ready' : 'Not Ready' }} <!-- Frågetecken är som en if-else-->
       </div>
       
-        <div class="buttonrow">
-          <div class="readyb">
-            <p>Ready</p>
-          </div>
-          <div class="readyb">
-            <p>Start</p>
-         </div>
+      <div class="buttonrow">
+        <div class="readyb" @click="handleAction">
+          <p>{{ isHost ? 'Start' : 'Ready' }}</p>
         </div>
+      </div>
       
     </div>
 
@@ -27,6 +25,7 @@
 // @ is an alias to /src
 import QuestionComponent from '@/components/QuestionComponent.vue';
 import io from 'socket.io-client';
+import {RouterLink} from 'vue-router';
 const socket = io("localhost:3000");
 
 export default {
@@ -35,25 +34,55 @@ export default {
   data() {
     return {
       players: [
-        {id: 1, namn: "Alexander", ready: true},
-        {id: 2, namn: "David", ready: false}
-      ]
+        { id: 1, namn: "host", ready: true, points: 0, isHost: true },
+        { id: 2, namn: "Alexander", ready: true, points: 0, isHost: false },
+        { id: 3, namn: "David", ready: true, points: 0, isHost: false }
+      ],
+      myID: 1,          // ← THIS is how the window knows who it is
+      lobbyID: "lAH912"
     }
   },
-  created() {
-    this.pollId = this.$route.params.id;
-    socket.on( "questionUpdate", q => this.question = q );
-    socket.on( "submittedAnswersUpdate", answers => this.submittedAnswers = answers );
-    socket.on( "uiLabels", labels => this.uiLabels = labels );
-    socket.emit( "getUILabels", this.lang );
-    socket.emit( "joinPoll", this.pollId );
+
+  computed: {
+    currentUser() {
+      return this.players.find(p => p.id === this.myID)
+    },
+    isHost() {
+      return this.currentUser?.isHost === true
+    },
+      nonHostPlayers() {
+    return this.players.filter(player => !player.isHost);
+    }
   },
+
   methods: {
-    submitAnswer: function (answer) {
-      socket.emit("submitAnswer", {pollId: this.pollId, answer: answer})
+    handleAction() {
+      if (this.isHost && this.allReady()) {
+        this.startGame()
+      } else {
+        this.toggleReady()
+      }
+    },
+    startGame() {
+      console.log("start")
+        this.$router.push("/host")
+    },
+    allReady(){
+      for (const player of this.players){
+        if (!player.isHost && !player.ready){
+          return false
+        }
+      }
+      return true
+    },
+    toggleReady() {
+      if (this.currentUser) {
+        this.currentUser.ready = !this.currentUser.ready
+      }
     }
   }
 }
+
 </script>
 
 <style>
@@ -67,7 +96,7 @@ export default {
 }
 
 #maindiv {
-  width: 85%;
+  width: 70%;
   height: 80%;
   background-color: rgb(145, 145, 145);
   border-radius: 20px;
@@ -81,7 +110,7 @@ export default {
 .playerbox{
   background-color: rgb(255, 255, 255);
   border-radius: 20px;
-  padding: 5px;
+  padding: 15px;
 }
 
 .readyb{
