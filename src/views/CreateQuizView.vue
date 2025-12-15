@@ -45,17 +45,81 @@
           <div class="year-label">Year</div>
 
           <div class="year-input-row">
-            <div class="year-display" contenteditable="true">1920</div>
+            <input
+                class="year-display"
+                type="number"
+                v-model.number="yearGuess"
+                min="1900"
+                max="2025"
+                max-length="4"
+          />
+            
           </div>
+          
+          <input class="year-slider" 
+          type="range"
+          id ="yearRange"
+          v-model.number="yearGuess" 
+          min="1900" 
+          max="2025" 
+          value="1920" 
 
-          <input class="year-slider" type="range" min="1900" max="2025" value="1920" />
+          />
 
           <div class="year-range">1900 – 2025</div>
         </div>
+        <div class="submitGuess">
+        <button class="save-btn" id ="saveQuestionBtn">
+          Save Question
+        </button>
       </div>
+      </div>
+      
     </section>
   </div>
 </template>
+
+<script>
+  import ResponsiveNav from '@/components/ResponsiveNav.vue';
+import io from 'socket.io-client';
+const socket = io("localhost:3000");
+
+export default {
+  name: 'StartView',
+  components: {
+    ResponsiveNav
+  },
+  data: function () {
+    return {
+      uiLabels: {},
+      newPollId: "",
+      lang: localStorage.getItem("lang") || "en",
+      hideNav: true,
+      yearGuess: 1960
+    }
+  },
+  created: function () {
+    socket.on("uiLabels", labels => this.uiLabels = labels);
+    socket.emit("getUILabels", this.lang);
+  },
+  methods: {
+    switchLanguage: function () {
+      if (this.lang === "en") {
+        this.lang = "sv"
+      }
+      else {
+        this.lang = "en"
+      }
+      localStorage.setItem("lang", this.lang);
+      socket.emit("getUILabels", this.lang);
+    },
+    toggleNav: function () {
+      this.hideNav = !this.hideNav;
+    }
+  }
+}
+
+</script>
 
 <style scoped>
 /* ========== Theme Tokens ========== */
