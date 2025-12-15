@@ -10,7 +10,7 @@ const router = createRouter({
       component: HomeView,
     },
     {
-      path: '/poll',
+      path: '/play',
       name: 'PlayView',  // you may rename based on your logic
       component: () => import('../views/PlayView.vue'),
     },

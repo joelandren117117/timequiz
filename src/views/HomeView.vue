@@ -1,78 +1,106 @@
-<template>
-  <div>
-    Poll link: 
-    <input type="text" v-model="pollId">
-    <button v-on:click="createPoll">
-      Create poll
-    </button>
-    <div>
-      {{ uiLabels.question }}:
-      <input type="text" v-model="question">
-      <div>
-        Answers:
-        <input v-for="(_, i) in answers" 
-               v-model="answers[i]" 
-               v-bind:key="'answer' + i">
-        <button v-on:click="addAnswer">
-          Add answer alternative
-        </button>
+<script setup>
+  import { RouterLink } from 'vue-router';
+  </script>
+  
+  <template>
+      <div class="home-container">
+          <header class="app-header">
+              <h1 class="logo-title">TIMEGUESSR</h1>
+          </header>
+  
+          <div class="action-buttons">
+              <p class="tagline">Guess time &amp; place — Challenge your friends!</p>
+  
+              <RouterLink to="/play" class="button-link">
+                  <button class="action-btn primary-action-btn">
+                      Play
+                  </button>
+              </RouterLink>
+  
+              <RouterLink to="/create" class="button-link">
+                  <button class="action-btn secondary-action-btn">
+                      Create
+                  </button>
+              </RouterLink>
+          </div>
       </div>
-    </div>
-    <button v-on:click="addQuestion">
-      Add question
-    </button>
-    <input type="number" v-model="questionNumber">
-    <button v-on:click="startPoll">
-      Start poll
-    </button>
-    <button v-on:click="runQuestion">
-      Run question
-    </button>
-    <router-link v-bind:to="'/result/' + pollId">Check result</router-link>
-    Data: {{ pollData }}
-  </div>
-</template>
+  </template>
+  
+  <style scoped>
 
-<script>
-import io from 'socket.io-client';
-const socket = io("localhost:3000");
-
-export default {
-  name: 'CreateView',
-  data: function () {
-    return {
-      lang: localStorage.getItem("lang") || "en",
-      pollId: "",
-      question: "",
-      answers: ["", ""],
-      questionNumber: 0,
-      pollData: {},
-      uiLabels: {},
-    }
-  },
-  created: function () {
-    socket.on( "uiLabels", labels => this.uiLabels = labels );
-    socket.on( "pollData", data => this.pollData = data );
-    socket.on( "participantsUpdate", p => this.pollData.participants = p );
-    socket.emit( "getUILabels", this.lang );
-  },
-  methods: {
-    createPoll: function () {
-      socket.emit("createPoll", {pollId: this.pollId, lang: this.lang })
-      socket.emit("joinPoll", this.pollId);
-    },
-    startPoll: function () {
-      socket.emit("startPoll", this.pollId)
-    },
-    addQuestion: function () {
-      socket.emit("addQuestion", {pollId: this.pollId, q: this.question, a: this.answers } )
-    },
-    addAnswer: function () {
-      this.answers.push("");
-    },
-    runQuestion: function () {
-      socket.emit("runQuestion", {pollId: this.pollId, questionNumber: this.questionNumber})
-    }
+  .home-container {
+      background-color: #FEFCEF;
+      min-height: 100vh;
+      padding: 3rem 2rem;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #1D1C1B;
+  
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: cente
+  }    
+  
+  .app-header {
+      margin-bottom: 2rem;
   }
-}
-</script>
+  
+  .logo-title {
+      font-size: 5rem;
+      font-weight: 900;
+      color: #EA3E34;
+      letter-spacing: -0.05em;
+      text-transform: uppercase;
+      margin: 0;
+  }
+  
+  .tagline {
+      font-size: 1.4rem;
+      color: #1D1C1B;
+      margin-bottom: 2.5rem;
+  }
+  
+  .action-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      width: 100%;
+      max-width: 400px;
+  }
+  
+  .button-link {
+      text-decoration: none;
+  }
+  
+  .action-btn {
+      width: 100%;
+      font-size: 1.4rem;
+      font-weight: bold;
+      padding: 1.5rem;
+      border: 3px solid transparent; 
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+  
+  .primary-action-btn {
+      background-color: #EA3E34;
+      color: #FEFCEF;
+  }
+  
+  .primary-action-btn:hover {
+      background-color: #D7382F;
+      box-shadow: 0 4px 10px rgba(234, 62, 52, 0.25);
+  }
+  
+
+  .secondary-action-btn {
+      background-color: transparent;
+      color: #EA3E34;
+      border-color: #EA3E34;
+  }
+  
+  .secondary-action-btn:hover {
+      background-color: rgba(234, 62, 52, 0.1);
+  }
+  </style>
