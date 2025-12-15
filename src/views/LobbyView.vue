@@ -38,7 +38,7 @@ export default {
         { id: 2, namn: "Alexander", ready: true, points: 0, isHost: false },
         { id: 3, namn: "David", ready: true, points: 0, isHost: false }
       ],
-      myID: 1,          // ← THIS is how the window knows who it is
+      myID: 1,
       lobbyID: "lAH912"
     }
   },
