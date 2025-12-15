@@ -35,9 +35,8 @@ export default {
   data() {
     return {
       players: [
-        {id: 1, namn: "Alexander", ready: true, points: 2},
-        {id: 2, namn: "David", ready: true, points: 5},
-        {id: 3, namn: "Elliot", ready: true, points: 3}
+        {id: 1, namn: "Alexander", ready: true},
+        {id: 2, namn: "David", ready: false}
       ]
     }
   },
