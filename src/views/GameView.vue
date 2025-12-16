@@ -41,6 +41,7 @@
 
     <section class="map-section">
         <h2>Player Guess Map</h2>
+        <div class="map-container ">
         <LeafletMap
           :center="initialCenter"
           :zoom="4"
@@ -49,6 +50,7 @@
           :guessMarker="playerGuess"
           @map-click="onPlayerMapClick"
         />
+        </div>
   
         <p class="map-info">
           Current guess:
@@ -180,6 +182,14 @@ export default {
     padding: 1rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   }
+  .map-container{
+    height: 400px;
+    width: 100%;
+  }
+  .map-container :deep(.leaflet-container) {
+  height: 100%;
+  width: 100%;
+}
 
 #map {
     width: 100%;
