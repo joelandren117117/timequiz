@@ -1,3 +1,8 @@
+<script setup>
+  import { RouterLink } from 'vue-router';
+</script>
+   
+      
       <template>
       <div class="home-container">
           <header class="app-header">
@@ -22,10 +27,6 @@
       </div>
   </template>
 
-<script setup>
-  import { RouterLink } from 'vue-router';
-</script>
-  
   <style scoped>
 
   .home-container {
