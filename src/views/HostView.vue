@@ -1,13 +1,13 @@
 <template>
   <header class="app-header">
-      <h1 class="logo-title">
-        <span class="logo-short">TJ</span>
-        <span class="logo-full">TOAJMGUÄSSÄR</span>
-      </h1>
-    </header>
+    <h1 class="logo-title">
+      <span class="logo-short">TJ</span>
+      <span class="logo-full">TOAJMGUÄSSÄR</span>
+    </h1>
+  </header>
 
-  <main class="layout">
-    <!-- Left column: stacked boxes (host controls + participants) -->
+  <main class="layout" v-if="lobby">
+    <!-- Left column: host controls + participants -->
     <div class="left-column">
       <section class="host-box">
         <div class="host-grid" role="group" aria-label="Host controls">
@@ -19,11 +19,11 @@
       </section>
 
       <section class="players-box">
-        <h2>Deltagare</h2>
+        <h2>Players</h2>
         <ul class="players">
           <li v-for="player in players" :key="player.id">
-            <span class="pname">{{ player.namn }}</span>
-            <span class="pscore">{{ player.points }} poäng</span>
+            <span class="pname">{{ player.name }}</span>
+            <span class="pscore">Player</span>
           </li>
         </ul>
       </section>
@@ -34,69 +34,49 @@
       <div class="map-wrapper">
         <LeafletMap :center="initialCenter" :zoom="3" :markers="adminMarkers" />
       </div>
-      <div class="map-info">
+      <div class="map-info" v-if="adminMarkers.length">
         <ul class="map-info-list">
-          <li v-for="m in adminMarkers" :key="m.id">{{ m.label }} – {{ m.lat.toFixed(3) }}, {{ m.lng.toFixed(3) }}</li>
+          <li v-for="m in adminMarkers" :key="m.id">
+            {{ m.label }} – {{ m.lat.toFixed(3) }}, {{ m.lng.toFixed(3) }}
+          </li>
         </ul>
       </div>
     </section>
   </main>
 
+  <div v-else class="lobby-missing">
+    <p>Lobby not found.</p>
+    <router-link to="/play">Back to Play</router-link>
+  </div>
 </template>
 
-<script>
-import ResponsiveNav from '@/components/ResponsiveNav.vue';
-import io from 'socket.io-client';
-import { ref, computed } from 'vue';
+<script setup>
+import { computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import LeafletMap from '../components/LeafletMap.vue';
-const socket = io("localhost:3000");
+import { getLobby } from '@/stores/lobbyStore';
 
+const route = useRoute();
+const router = useRouter();
 
-export default {
-  name: 'StartView',
-  components: {
-    ResponsiveNav,
-    LeafletMap
-  },
+const lobbyId = computed(() => route.query.lobby);
+const lobby = computed(() => getLobby(lobbyId.value));
 
-  data() {
-    return {
-      initialCenter: [54, 15],
-      uiLabels: {},
-      newPollId: "",
-      hideNav: true,
-      lang: localStorage.getItem("lang") || "en",
-      players: [
-        { id: 1, namn: "Alexander", ready: true, points: 100000 },
-        { id: 2, namn: "David", ready: true, points: 5 },
-        { id: 3, namn: "Elliot", ready: true, points: -3 }
-      ]
-      ,
-      adminMarkers: []
-    }
-  },
-  created: function () {
-    socket.on("uiLabels", labels => this.uiLabels = labels);
-    socket.emit("getUILabels", this.lang);
-  },
-  methods: {
-    switchLanguage: function () {
-      if (this.lang === "en") {
-        this.lang = "sv"
-      }
-      else {
-        this.lang = "en"
-      }
-      localStorage.setItem("lang", this.lang);
-      socket.emit("getUILabels", this.lang);
-    },
-    toggleNav: function () {
-      this.hideNav = !this.hideNav;
-    }
-  },
-  mounted() {
-    this.players.sort((a, b) => b.points - a.points)
-  }
+const players = computed(() => lobby.value?.players || []);
+const adminMarkers = computed(() =>
+  (lobby.value?.guesses || []).map((g) => ({
+    id: `g-${g.playerId}`,
+    lat: g.lat,
+    lng: g.lng,
+    label: `${g.name} (${g.year})`,
+  }))
+);
+
+const initialCenter = [54, 15];
+
+if (!lobby.value) {
+  // If no lobby found, you can redirect or show a message
+  console.warn('Lobby not found');
 }
 </script>
 <style scoped>
@@ -173,13 +153,6 @@ export default {
   padding: 2em;
   align-items: stretch;
 }
-/* === Vänster sida: deltagare === */
-.sidebar {
-  background: lightblue;
-  padding: 2em;
-  border-radius: 1em;
-}
-
 .players {
   list-style: none;
   padding: 0;
@@ -230,12 +203,16 @@ export default {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  background-color: black; 
+  background: #0f172a;
 }
 
 .map-wrapper {
   flex: 1 1 auto;
   min-height: 0;
+  height: 60vh;
+}
+
+.map-wrapper :deep(.leaflet-map) {
   height: 100%;
 }
 

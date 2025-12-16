@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev:frontend": "vite",
-    "dev:backend": "nodemon server/index.js",
-    "dev": "concurrently 'npm:dev:frontend' 'npm:dev:backend'",
+    "dev:backend": "nodemon --signal SIGTERM server/index.js",
+    "dev": "concurrently -k -s first \"npm:dev:frontend\" \"npm:dev:backend\"",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
