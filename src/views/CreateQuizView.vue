@@ -15,24 +15,24 @@ src/views/CreateQuizView.vues<template>
       <div class="question-list">
         <div class="question-item">
           <span>Question 1</span>
-          <button class="edit-btn">Edit</button>
+          <button class="btn btn-secondary">Edit</button>
         </div>
         <div class="question-item">
           <span>Question 2</span>
-          <button class="edit-btn">Edit</button>
+          <button class="btn btn-secondary">Edit</button>
         </div>
         <div class="question-item">
           <span>Question 3</span>
-          <button class="edit-btn">Edit</button>
+          <button class="btn btn-secondary">Edit</button>
         </div>
         <div class="question-item">
           <span>Question 4</span>
-          <button class="edit-btn">Edit</button>
+          <button class="btn btn-secondary">Edit</button>
         </div>
       </div>
 
-      <button class="add-question-btn">+ Add Question</button>
-      <button class="save-btn">Save Quiz</button>
+      <button class="btn btn-primary">+ Add Question</button>
+      <button class="btn btn-primary">Save Quiz</button>
     </section>
 
     <section class="question-editor">
@@ -61,7 +61,7 @@ src/views/CreateQuizView.vues<template>
           <div class="year-range">1900 – 2025</div>
         </div>
         <div class="submitGuess">
-          <button class="save-btn" id="saveQuestionBtn">
+          <button class="btn btn-primary" id="saveQuestionBtn">
             Save Question
           </button>
         </div>
@@ -129,20 +129,8 @@ export default {
 </script>
 
 <style scoped>
-/* ========== Theme Tokens ========== */
+/* ========== Layout ========== */
 .create-quiz-container {
-  --bg: #f3feef;
-  --surface: #ffffff;
-  --text: #1D1C1B;
-
-
-  --primary: #39643a;
-  /* main logo green */
-  --primary-dark: #225b24;
-  /* hover/active */
-  --primary-soft: rgba(41, 77, 25, 0.08);
-  --primary-soft-strong: rgba(128, 200, 96, 0.16);
-
   background-color: var(--bg);
   min-height: 100vh;
   padding: 3rem 2rem;
@@ -269,52 +257,6 @@ export default {
 .question-item:hover {
   background-color: var(--primary-soft);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-/* Edit Button - secondary style */
-.edit-btn {
-  background-color: transparent;
-  color: var(--primary);
-  border: 2px solid var(--primary);
-
-  padding: 0.4rem 1rem;
-  border-radius: 999px;
-
-  font-weight: bold;
-  cursor: pointer;
-
-  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-}
-
-.edit-btn:hover {
-  background-color: var(--primary-soft-strong);
-}
-
-/* Main Buttons */
-.add-question-btn,
-.save-btn {
-  background-color: var(--primary);
-  color: var(--bg);
-  font-size: 1.2rem;
-  font-weight: bold;
-
-  padding: 1rem;
-  border: none;
-  border-radius: 12px;
-
-  cursor: pointer;
-  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.08s ease;
-}
-
-.add-question-btn:hover,
-.save-btn:hover {
-  background-color: var(--primary-dark);
-  box-shadow: 0 4px 10px rgba(128, 200, 96, 0.28);
-}
-
-.add-question-btn:active,
-.save-btn:active {
-  transform: translateY(1px);
 }
 
 /* ========== Right Side / Editor Placeholder ========== */
