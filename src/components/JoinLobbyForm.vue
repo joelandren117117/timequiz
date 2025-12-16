@@ -1,61 +1,37 @@
 <script setup>
-    import { ref, onMounted, onUnmounted } from 'vue';
+    import { ref } from 'vue';
     import { useRouter } from 'vue-router';
-    import { joinLobby, onLobbyJoined } from '@/services/socketService';
+    import { joinLobby } from '@/stores/lobbyStore';
     
     const router = useRouter();
     
-    // Variabler för formulär-input
     const lobbyId = ref('');
     const playerName = ref('');
     const errorMessage = ref('');
     const isJoining = ref(false);
     
-    // --- Hantera anslutningssvar från Servern ---
-    
-    // Vi sätter upp en lyssnare när komponenten skapas (mounted)
-    onMounted(() => {
-        // onLobbyJoined anropas när servern bekräftar att spelaren är i lobbyn
-        onLobbyJoined(handleLobbyJoined);
-        
-        // Servern bör också svara med ett fel om anslutningen misslyckas (t.ex. lobby finns inte)
-        // socket.on('lobby:error', handleLobbyError); // Lägg till denna logik senare
-    });
-    
-    // Vi städar upp lyssnaren när komponenten förstörs (unmounted)
-    onUnmounted(() => {
-        // socket.off('lobby:joined', handleLobbyJoined);
-        // socket.off('lobby:error', handleLobbyError);
-    });
-    
-    // Metod som körs när servern bekräftar att vi är anslutna
-    const handleLobbyJoined = (data) => {
-        isJoining.value = false;
-        // Servern skickar troligen tillbaka det riktiga Lobby ID
-        const actualLobbyId = data.id || lobbyId.value; 
-        
-        // Navigera till Lobby-vyn (/lobby/:id)
-        router.push({ name: 'LobbyView', params: { id: actualLobbyId } });
-    };
-    
-    
-    // --- Hantera formulärets Submit ---
-    
     const handleJoinLobby = () => {
-        // Validering
         if (!lobbyId.value || !playerName.value) {
-            errorMessage.value = "Både Lobby ID och Spelarnamn måste anges.";
+            errorMessage.value = "Both Lobby ID and player name are required.";
             return;
         }
         
         errorMessage.value = '';
         isJoining.value = true;
-        
-        // 1. Skicka anslutningsförfrågan via tjänsten
-        joinLobby(lobbyId.value, playerName.value);
-        
-        // 2. Vi väntar nu på svaret i handleLobbyJoined som är kopplad till onLobbyJoined
-        // Om servern inte svarar snabbt, kan vi lägga in en timeout-logik här.
+    
+        try {
+            const id = lobbyId.value.trim().toUpperCase();
+            const name = playerName.value.trim();
+            const { playerId } = joinLobby(id, name);
+            router.push({
+                path: '/lobby',
+                query: { lobby: id, player: playerId },
+            });
+        } catch (err) {
+            errorMessage.value = err.message || 'Could not join lobby.';
+        } finally {
+            isJoining.value = false;
+        }
     };
     </script>
     

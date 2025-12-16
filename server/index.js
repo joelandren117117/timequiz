@@ -24,7 +24,29 @@ io.on('connection', function (socket) {
   sockets(this, socket, data);
 });
 
-const PORT = process.env.PORT || 3000;
-httpServer.listen(PORT, function() {
-    console.log("Socket.io server running on http://localhost:" + PORT);
+const HOST = process.env.HOST || "127.0.0.1";
+const PORT = Number(process.env.PORT) || 3000;
+
+let hasRetried = false;
+
+const startServer = (port = PORT) => {
+  httpServer.listen(port, HOST, () => {
+    const actualPort = httpServer.address().port;
+    console.log(`Socket.io server running on http://${HOST}:${actualPort}`);
+  });
+};
+
+httpServer.on("error", (err) => {
+  if (["EACCES", "EADDRINUSE", "EPERM"].includes(err.code) && !hasRetried) {
+    hasRetried = true;
+    console.warn(
+      `Port ${PORT} unavailable (${err.code}). Retrying on a random available port...`
+    );
+    startServer(0); // 0 = let OS choose an open port
+  } else {
+    console.error("Server failed to start:", err);
+    process.exit(1);
+  }
 });
+
+startServer();
