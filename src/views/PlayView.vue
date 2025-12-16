@@ -4,9 +4,11 @@ import { useRouter } from 'vue-router';
 import JoinLobbyForm from '@/components/JoinLobbyForm.vue';
 import QuizList from '@/components/QuizList.vue';
 import quizesData from '../../server/data/quizes.json';
+import { createLobby as createLobbyInStore } from '@/stores/lobbyStore';
 
 const currentMode = ref('join');
 const selectedQuizId = ref('');
+const hostName = ref('');
 const quizes = quizesData.quizes ?? [];
 const router = useRouter();
 
@@ -20,7 +22,11 @@ const onSelectQuiz = (id) => {
 
 const createLobby = () => {
   if (!selectedQuizId.value) return;
-  router.push({ path: '/lobby', query: { quiz: selectedQuizId.value } });
+  const { lobby, playerId } = createLobbyInStore(selectedQuizId.value, hostName.value || 'Host');
+  router.push({
+    path: '/lobby',
+    query: { lobby: lobby.id, player: playerId, quiz: selectedQuizId.value },
+  });
 };
 </script>
   
@@ -59,6 +65,16 @@ const createLobby = () => {
   
                   <div v-else-if="currentMode === 'host'">
                       <p class="description-text">Choose a quiz from the list below to create a new lobby:</p>
+                      <div class="form-row">
+                        <label class="text-label" for="host-name">Host name</label>
+                        <input
+                          id="host-name"
+                          v-model="hostName"
+                          placeholder="Enter your name"
+                          maxlength="12"
+                          class="text-input"
+                        />
+                      </div>
                       <QuizList
                         :quizes="quizes"
                         :selected-id="selectedQuizId"
@@ -148,11 +164,31 @@ const createLobby = () => {
       border-color: #EA3E34;
   }
   
-  .description-text {
-      text-align: center;
-      margin-bottom: 1.5rem;
-      font-size: 1.1rem;
-  }
+.description-text {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+}
+
+.form-row {
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+.text-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+
+.text-input {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #dcdcdc;
+  border-radius: 8px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
 
 .selected-quiz {
   text-align: center;
