@@ -1,4 +1,4 @@
- src/views/CreateQuizView.vues<template>
+src/views/CreateQuizView.vues<template>
   <div class="create-quiz-container">
     <!-- Logo style title -->
     <header class="app-header">
@@ -38,93 +38,99 @@
     <section class="question-editor">
       <div class="map-panel">
         <div class="map-container">
-          <span class="map-placeholder">Map goes here</span>
+          <LeafletMap :center="[correctLocation.lat, correctLocation.lng]" :zoom="5" :markers="[
+            {
+              id: 'correct',
+              lat: correctLocation.lat,
+              lng: correctLocation.lng,
+              label: 'Correct location',
+            },
+          ]" />
         </div>
-
         <div class="year-control">
           <div class="year-label">Year</div>
 
           <div class="year-input-row">
-            <input
-                class="year-display"
-                type="number"
-                v-model.number="yearGuess"
-                min="1900"
-                max="2025"
-                max-length="4"
-          />
-            
-          </div>
-          
-          <input class="year-slider" 
-          type="range"
-          id ="yearRange"
-          v-model.number="yearGuess" 
-          min="1900" 
-          max="2025" 
-          value="1920" 
+            <input class="year-display" type="number" v-model.number="yearGuess" min="1900" max="2025" max-length="4" />
 
-          />
+          </div>
+
+          <input class="year-slider" type="range" id="yearRange" v-model.number="yearGuess" min="1900" max="2025"
+            value="1920" />
 
           <div class="year-range">1900 – 2025</div>
         </div>
         <div class="submitGuess">
-        <button class="save-btn" id ="saveQuestionBtn">
-          Save Question
-        </button>
+          <button class="save-btn" id="saveQuestionBtn">
+            Save Question
+          </button>
+        </div>
       </div>
-      </div>
-      
     </section>
   </div>
 </template>
 
 <script>
-  import ResponsiveNav from '@/components/ResponsiveNav.vue';
-import io from 'socket.io-client';
-const socket = io("localhost:3000");
+import LeafletMap from "../components/LeafletMap.vue";
+import io from "socket.io-client";
+
+const socket = io("http://localhost:3000");
 
 export default {
-  name: 'StartView',
+  name: "CreateQuizView",
   components: {
-    ResponsiveNav
+    LeafletMap,
   },
-  data: function () {
+  data() {
     return {
       uiLabels: {},
       newPollId: "",
       lang: localStorage.getItem("lang") || "en",
       hideNav: true,
-      yearGuess: 1960
-    }
+
+      yearGuess: 1960,
+
+      correctLocation: {
+        lat: 48.8584,
+        lng: 2.2945,
+      },
+    };
   },
-  created: function () {
-    socket.on("uiLabels", labels => this.uiLabels = labels);
+  computed: {
+    correctMarkers() {
+      return [
+        {
+          id: "correct",
+          lat: this.correctLocation.lat,
+          lng: this.correctLocation.lng,
+          label: "Correct location",
+        },
+      ];
+    },
+  },
+  created() {
+    socket.on("uiLabels", (labels) => (this.uiLabels = labels));
     socket.emit("getUILabels", this.lang);
   },
+  beforeUnmount() {
+    socket.off("uiLabels");
+  },
   methods: {
-    switchLanguage: function () {
-      if (this.lang === "en") {
-        this.lang = "sv"
-      }
-      else {
-        this.lang = "en"
-      }
+    switchLanguage() {
+      this.lang = this.lang === "en" ? "sv" : "en";
       localStorage.setItem("lang", this.lang);
       socket.emit("getUILabels", this.lang);
     },
-    toggleNav: function () {
+    toggleNav() {
       this.hideNav = !this.hideNav;
-    }
-  }
-}
-
+    },
+  },
+};
 </script>
 
 <style scoped>
 /* ========== Theme Tokens ========== */
 .create-quiz-container {
-  /* Neutrals (keep same vibe) */
   --bg: #f3feef;
   --surface: #ffffff;
   --text: #1D1C1B;
@@ -153,12 +159,15 @@ export default {
     "editor";
   row-gap: 2rem;
 }
+
 .logo-full {
   display: none;
 }
+
 .logo-short {
   display: inline;
 }
+
 /* Larger screens: quiz in left third, right side empty for now */
 @media (min-width: 900px) {
   .create-quiz-container {
@@ -170,9 +179,11 @@ export default {
     column-gap: 8rem;
     align-items: flex-start;
   }
+
   .logo-short {
     display: none;
   }
+
   .logo-full {
     display: inline;
   }
@@ -318,11 +329,12 @@ export default {
     display: block;
   }
 }
+
 .map-panel {
   background-color: #FFFFFF;
   border-radius: 12px;
   padding: 2rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 
   max-width: 900px;
   margin: 0 auto;
@@ -340,7 +352,7 @@ export default {
 }
 
 .map-container {
-  height: 360px;
+  height: 480px;
   border-radius: 12px;
   border: 2px solid var(--primary, #4C9A4E);
   background: #F7FAF5;
@@ -350,6 +362,10 @@ export default {
   justify-content: center;
   position: relative;
   overflow: hidden;
+}
+.map-container :deep(.leaflet-container) {
+  height: 100%;
+  width: 100%;
 }
 
 .map-placeholder {
@@ -422,6 +438,17 @@ export default {
 .year-range {
   font-size: 0.95rem;
   opacity: 0.65;
+}
+
+
+.map-section h2 {
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.map-info {
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
 }
 
 </style>
