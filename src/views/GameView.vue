@@ -35,7 +35,8 @@
     <!-- Vänster panel: år -->
     <aside class="sidebar">
         <h2>Bild</h2>
-        <img src="https://images.citybreakcdn.com/image.aspx?ImageId=8661679" class="picture"/>
+        <img :src="currentQuestion.imageUrl" :alt="currentQuestion.prompt" class="picture"/>
+        <!---<img src="https://images.citybreakcdn.com/image.aspx?ImageId=8661679" class="picture"/>-->
     </aside>
 
     <section class="map-container">
@@ -70,6 +71,7 @@
 <script>
 import ResponsiveNav from '@/components/ResponsiveNav.vue';
 import io from 'socket.io-client';
+import quizesData from '../../server/data/quizes.json';
 const socket = io("localhost:3000");
 
 export default {
@@ -78,14 +80,27 @@ export default {
     ResponsiveNav
   },
   data: function () {
+    const quiz = quizesData.quizes && quizesData.quizes[0] ? quizesData.quizes[0] : { questions: [] };
+    const firstQuestion = quiz.questions[0] || { year: 1960 };
+    const minYear = 1900;
+    const maxYear = 2025;
     return {
       uiLabels: {},
-      newPollId: "",
       lang: localStorage.getItem("lang") || "en",
-      hideNav: true,
-      yearGuess: 1960
+      quiz,
+      qIndex: 0,
+      yearGuess: firstQuestion.year || 1960,
+      feedback: null,
+      minYear,
+      maxYear
     }
   },
+computed: {
+    currentQuestion() {
+      return this.quiz.questions[this.qIndex] || { imageUrl: '', prompt: '', year: 1960 };
+    }
+  },
+
   created: function () {
     socket.on("uiLabels", labels => this.uiLabels = labels);
     socket.emit("getUILabels", this.lang);
