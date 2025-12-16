@@ -1,8 +1,9 @@
 <script setup>
   import { RouterLink } from 'vue-router';
-  </script>
-  
-  <template>
+</script>
+   
+      
+      <template>
       <div class="home-container">
           <header class="app-header">
               <h1 class="logo-title">TIMEGUESSR</h1>
@@ -25,7 +26,7 @@
         </div>
       </div>
   </template>
-  
+
   <style scoped>
 
   .home-container {

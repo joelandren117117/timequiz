@@ -249,5 +249,4 @@ export default {
   background-color: rgba(234, 62, 52, 0.1);
   transform: translateY(-1px);
 }
-
 </style>
