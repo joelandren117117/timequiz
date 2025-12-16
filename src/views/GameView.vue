@@ -1,15 +1,12 @@
 <template>
-  <header>
-    <div v-bind:class="['hamburger', { 'close': !hideNav }]" v-on:click="toggleNav">
-    </div>
-    <div class="logo">
-      <img src="/quizpic.png">
-      Timequiz
-      <img src="../assets/logo.svg">
-    </div>
-  </header>
+   <header class="app-header">
+      <h1 class="logo-title">
+        <span class="logo-short">TJ</span>
+        <span class="logo-full">TOAJMGUÄSSÄR</span>
+      </h1>
+    </header>
 
-  <!--meny från micke-->
+  <!--meny från micke
   <ResponsiveNav v-bind:hideNav="hideNav">
     <button v-on:click="switchLanguage">
       {{ uiLabels.changeLanguage }}
@@ -22,7 +19,7 @@
     </a>
     <a href="">FAQ</a>
   </ResponsiveNav>
-  <!--meny från micke-->
+  meny från micke-->
 
  <!-- <h1>{{ uiLabels.heading }}</h1>
   <h2>{{ uiLabels.subHeading }}</h2>
@@ -38,112 +35,111 @@
     <!-- Vänster panel: år -->
     <aside class="sidebar">
         <h2>Bild</h2>
-        <img src="https://images.citybreakcdn.com/image.aspx?ImageId=8661679" class="picture"/>
+        <img :src="currentQuestion.imageUrl" :alt="currentQuestion.prompt" class="picture"/>
+        <!---<img src="https://images.citybreakcdn.com/image.aspx?ImageId=8661679" class="picture"/>-->
     </aside>
 
-    <section class="map-container">
-        <h2>Karta</h2>
-        <div id="map"></div>
-        <div class="yearSlider">
-        <label for="yearRange">År: <strong>{{ yearGuess }}</strong></label>
-        <input 
-            type="range" 
-            id ="yearRange"
-            v-model.number="yearGuess"
-            min="1900" 
-            max="2024" 
-            step ="1"
+    <section class="map-section">
+        <h2>Player Guess Map</h2>
+        <LeafletMap
+          :center="initialCenter"
+          :zoom="4"
+          clickable
+          allowGuessMarker
+          :guessMarker="playerGuess"
+          @map-click="onPlayerMapClick"
+        />
+  
+        <p class="map-info">
+          Current guess:
+          <span v-if="playerGuess">
+            {{ playerGuess.lat.toFixed(3) }}, {{ playerGuess.lng.toFixed(3) }}
+          </span>
+          <span v-else>Click on the map to make a guess.</span>
+        </p>
+  
+        <button
+          class="submit-button"
+          :disabled="!playerGuess"
+          @click="submitGuess"
         >
-        <div class="slider-labels">
-            <span>1900</span>
-            <span>2025</span>
-        </div>
-        </div>
-      <div class="submitGuess">
-        <button class="button">
-          Submit Guess
+          Submit guess
         </button>
-      </div>
-    </section>
-    
+      </section>
 </main>
 
 </template>
 
 <script>
 import ResponsiveNav from '@/components/ResponsiveNav.vue';
+import LeafletMap from '@/components/LeafletMap.vue';
 import io from 'socket.io-client';
+import quizesData from '../../server/data/quizes.json';
 const socket = io("localhost:3000");
 
 export default {
-  name: 'StartView',
-  components: {
-    ResponsiveNav
-  },
-  data: function () {
+  name: 'GameView',
+  components: { ResponsiveNav, LeafletMap },
+  data() {
+    const quiz = quizesData.quizes && quizesData.quizes[0] ? quizesData.quizes[0] : { questions: [] };
+    const firstQuestion = quiz.questions[0] || { year: 1960, location: { lat: 54, lng: 15 } };
     return {
       uiLabels: {},
-      newPollId: "",
       lang: localStorage.getItem("lang") || "en",
-      hideNav: true,
-      yearGuess: 1960
+      quiz,
+      qIndex: 0,
+      yearGuess: firstQuestion.year || 1960,
+      feedback: null,
+      minYear: 1900,
+      maxYear: 2025,
+      initialCenter: firstQuestion.location ? [firstQuestion.location.lat, firstQuestion.location.lng] : [54, 15],
+      playerGuess: null,
+      hideNav: true
+    };
+  },
+  computed: {
+    currentQuestion() {
+      return (this.quiz && this.quiz.questions && this.quiz.questions[this.qIndex]) || { imageUrl: '', prompt: '', year: 1960, location: { lat: 54, lng: 15 } };
     }
   },
-  created: function () {
+  created() {
     socket.on("uiLabels", labels => this.uiLabels = labels);
     socket.emit("getUILabels", this.lang);
   },
   methods: {
-    switchLanguage: function () {
-      if (this.lang === "en") {
-        this.lang = "sv"
-      }
-      else {
-        this.lang = "en"
-      }
+    onPlayerMapClick(payload) {
+      // förväntar { lat, lng }
+      this.playerGuess = payload;
+    },
+    submitGuess() {
+      if (!this.playerGuess) return;
+      console.log('Submitting guess:', this.playerGuess);
+      alert(`Guess sent: ${this.playerGuess.lat.toFixed(3)}, ${this.playerGuess.lng.toFixed(3)}`);
+    },
+    switchLanguage() {
+      this.lang = this.lang === 'en' ? 'sv' : 'en';
       localStorage.setItem("lang", this.lang);
       socket.emit("getUILabels", this.lang);
     },
-    toggleNav: function () {
+    toggleNav() {
       this.hideNav = !this.hideNav;
     }
   }
-}
+};
 </script>
 <style scoped>
-header {
-  background-color: gray;
-  width: 100%;
-  display: grid;
-  grid-template-columns: 2em auto;
+.app-header {
+  grid-area: header;
+  margin-bottom: 1rem;
 }
 
-.logo {
+.logo-title {
+  font-size: 5rem;
+  font-weight: 900;
+  color: var(--primary);
+  letter-spacing: -0.05em;
   text-transform: uppercase;
-  letter-spacing: 0.25em;
-  font-size: 2.5rem;
-  color: white;
-  padding-top: 0.2em;
-}
-
-.logo img {
-  height: 2.5rem;
-  vertical-align: bottom;
-  margin-right: 0.5rem;
-}
-
-.hamburger {
-  color: white;
-  width: 1em;
-  display: flex;
-  align-items: center;
-  justify-content: left;
-  padding: 0.5rem;
-  top: 0;
-  left: 0;
-  height: 2rem;
-  cursor: pointer;
-  font-size: 1.5rem;
+  margin: 0;
 }
 
 @media screen and (max-width:50em) {
@@ -152,18 +148,6 @@ header {
     display: flex;
     align-items: center;
     justify-content: center;
-  }
-
-  .hamburger::before {
-    content: "☰";
-  }
-
-  .close::before {
-    content: "✕";
-  }
-
-  .hide {
-    left: -12em;
   }
 }
 
@@ -190,11 +174,12 @@ header {
 }
 
 /* === Höger sida: karta === */
-.map-container {
-    background: lightblue;
-    padding: 1em;
-    border-radius: 1em;
-}
+.map-section {
+    background: #18181b;
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
 
 #map {
     width: 100%;

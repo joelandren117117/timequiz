@@ -10,13 +10,6 @@
         :class="{ selected: quiz.id === selectedId }"
       >
         <label class="quiz-row">
-          <input
-            type="radio"
-            name="quiz"
-            :value="quiz.id"
-            :checked="quiz.id === selectedId"
-            @change="$emit('select', quiz.id)"
-          />
           <div class="quiz-text">
             <div class="quiz-title">{{ quiz.name }}</div>
             <div class="quiz-meta">
@@ -24,6 +17,14 @@
               <span class="count">{{ quiz.questions?.length || 0 }} questions</span>
             </div>
           </div>
+          <input
+            class="quiz-radio"
+            type="radio"
+            name="quiz"
+            :value="quiz.id"
+            :checked="quiz.id === selectedId"
+            @change="$emit('select', quiz.id)"
+          />
         </label>
       </li>
     </ul>
@@ -78,6 +79,17 @@ const { quizes, selectedId } = toRefs(props);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
+.quiz-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.quiz-text {
+  flex: 1;
+  min-width: 0;
+}
+
 .quiz-title {
   font-weight: 600;
   margin-bottom: 4px;
@@ -98,5 +110,17 @@ const { quizes, selectedId } = toRefs(props);
   padding: 12px;
   color: #666;
   font-style: italic;
+}
+
+.quiz-radio {
+  width: 18px;
+  height: 18px;
+  accent-color: #ea3e34;
+  flex-shrink: 0;
+}
+
+.quiz-item.selected {
+  border-color: #ea3e34;
+  box-shadow: 0 4px 10px rgba(234, 62, 52, 0.16);
 }
 </style>
