@@ -1,11 +1,28 @@
 <script setup>
-  import { ref } from 'vue';
-  import JoinLobbyForm from '@/components/JoinLobbyForm.vue';
-  import QuizList from '@/components/QuizList.vue';
-  import { RouterLink } from 'vue-router';
-  
-  const currentMode = ref('join'); 
-  </script>
+import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import JoinLobbyForm from '@/components/JoinLobbyForm.vue';
+import QuizList from '@/components/QuizList.vue';
+import quizesData from '../../server/data/quizes.json';
+
+const currentMode = ref('join');
+const selectedQuizId = ref('');
+const quizes = quizesData.quizes ?? [];
+const router = useRouter();
+
+const selectedQuizName = computed(
+  () => quizes.find((q) => q.id === selectedQuizId.value)?.name || ''
+);
+
+const onSelectQuiz = (id) => {
+  selectedQuizId.value = id;
+};
+
+const createLobby = () => {
+  if (!selectedQuizId.value) return;
+  router.push({ path: '/lobby', query: { quiz: selectedQuizId.value } });
+};
+</script>
   
   <template>
       <div class="create-quiz-container"> 
@@ -42,12 +59,21 @@
   
                   <div v-else-if="currentMode === 'host'">
                       <p class="description-text">Choose a quiz from the list below to create a new lobby:</p>
-                      <QuizList />
-                        <RouterLink to="/lobby" class="button-link">
-                            <button class="action-btn primary-action-btn">
-                                Create Lobby
-                            </button>
-                        </RouterLink>
+                      <QuizList
+                        :quizes="quizes"
+                        :selected-id="selectedQuizId"
+                        @select="onSelectQuiz"
+                      />
+                      <p class="selected-quiz" v-if="selectedQuizName">
+                        Selected quiz: <strong>{{ selectedQuizName }}</strong>
+                      </p>
+                      <button
+                        class="action-btn primary-action-btn"
+                        :disabled="!selectedQuizId"
+                        @click="createLobby"
+                      >
+                        Create Lobby
+                      </button>
                   </div>
               </div>
           </section>
@@ -127,4 +153,37 @@
       margin-bottom: 1.5rem;
       font-size: 1.1rem;
   }
+
+.selected-quiz {
+  text-align: center;
+  margin: 0.75rem 0;
+}
+
+.action-btn {
+  display: block;
+  margin: 1rem auto 0;
+  padding: 0.9rem 1.6rem;
+  border-radius: 12px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.primary-action-btn {
+  background: #ea3e34;
+  color: #fefcef;
+  box-shadow: 0 8px 16px rgba(234, 62, 52, 0.25);
+}
+
+.action-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.action-btn:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(234, 62, 52, 0.32);
+}
   </style>
