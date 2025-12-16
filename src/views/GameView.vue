@@ -33,13 +33,31 @@
           </span>
           <span v-else>Click on the map to make a guess.</span>
         </p>
+
+        <div class="year-guess">
+          <div class="year-guess__label">
+            <span>Year guess</span>
+            <strong>{{ yearGuess }}</strong>
+          </div>
+          <input
+            type="range"
+            :min="minYear"
+            :max="maxYear"
+            v-model.number="yearGuess"
+            class="slider"
+          />
+          <div class="year-guess__scale">
+            <span>{{ minYear }}</span>
+            <span>{{ maxYear }}</span>
+          </div>
+        </div>
   
         <button
           class="submit-button"
           :disabled="!playerGuess"
           @click="submitGuess"
         >
-          Submit guess
+          Make My Guess
         </button>
       </section>
 </main>
@@ -89,8 +107,10 @@ export default {
     },
     submitGuess() {
       if (!this.playerGuess) return;
-      console.log('Submitting guess:', this.playerGuess);
-      alert(`Guess sent: ${this.playerGuess.lat.toFixed(3)}, ${this.playerGuess.lng.toFixed(3)}`);
+      console.log('Submitting guess:', this.playerGuess, 'year', this.yearGuess);
+      alert(`Guess sent:
+Location: ${this.playerGuess.lat.toFixed(3)}, ${this.playerGuess.lng.toFixed(3)}
+Year: ${this.yearGuess}`);
     },
     switchLanguage() {
       this.lang = this.lang === 'en' ? 'sv' : 'en';
@@ -170,6 +190,107 @@ export default {
     height: 30em;
     background: red;
     border-radius: 1em;
+}
+
+.year-guess {
+  margin: 1rem 0 1.25rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  color: #e5e7eb;
+}
+
+.year-guess__label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.95rem;
+  letter-spacing: 0.01em;
+}
+
+.year-guess__label strong {
+  font-size: 1.2rem;
+  color: #fde68a;
+  font-variant-numeric: tabular-nums;
+}
+
+.slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 10px;
+  margin: 0.65rem 0 0.35rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #6366f1, #22d3ee);
+  outline: none;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #0f172a;
+  border: 3px solid #22d3ee;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.slider::-webkit-slider-thumb:hover {
+  transform: scale(1.08);
+  box-shadow: 0 8px 18px rgba(34, 211, 238, 0.35);
+}
+
+.slider::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #0f172a;
+  border: 3px solid #22d3ee;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.slider::-moz-range-thumb:hover {
+  transform: scale(1.08);
+  box-shadow: 0 8px 18px rgba(34, 211, 238, 0.35);
+}
+
+.year-guess__scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.submit-button {
+  width: 100%;
+  padding: 0.9rem 1rem;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(120deg, #22d3ee, #6366f1 55%, #a855f7);
+  color: #0b1021;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 12px 30px rgba(99, 102, 241, 0.35);
+  transition: transform 0.12s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.submit-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 38px rgba(168, 85, 247, 0.35);
+  filter: brightness(1.02);
+}
+
+.submit-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  box-shadow: none;
 }
 
 /* Responsiv fix */
