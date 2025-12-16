@@ -12,7 +12,7 @@
       :step="step"
       :value="modelValue"
       @input="$emit('update:modelValue', Number($event.target.value))"
-    />
+    >
     <div class="slider-scale">
       <span>{{ min }}</span>
       <span>{{ max }}</span>
