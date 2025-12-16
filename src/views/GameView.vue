@@ -1,15 +1,12 @@
 <template>
-  <header>
-    <div v-bind:class="['hamburger', { 'close': !hideNav }]" v-on:click="toggleNav">
-    </div>
-    <div class="logo">
-      <img src="/quizpic.png">
-      Timequiz
-      <img src="../assets/logo.svg">
-    </div>
-  </header>
+   <header class="app-header">
+      <h1 class="logo-title">
+        <span class="logo-short">TJ</span>
+        <span class="logo-full">TOAJMGUÄSSÄR</span>
+      </h1>
+    </header>
 
-  <!--meny från micke-->
+  <!--meny från micke
   <ResponsiveNav v-bind:hideNav="hideNav">
     <button v-on:click="switchLanguage">
       {{ uiLabels.changeLanguage }}
@@ -22,7 +19,7 @@
     </a>
     <a href="">FAQ</a>
   </ResponsiveNav>
-  <!--meny från micke-->
+  meny från micke-->
 
  <!-- <h1>{{ uiLabels.heading }}</h1>
   <h2>{{ uiLabels.subHeading }}</h2>
@@ -111,39 +108,18 @@ export default {
 }
 </script>
 <style scoped>
-header {
-  background-color: gray;
-  width: 100%;
-  display: grid;
-  grid-template-columns: 2em auto;
+.app-header {
+  grid-area: header;
+  margin-bottom: 1rem;
 }
 
-.logo {
+.logo-title {
+  font-size: 5rem;
+  font-weight: 900;
+  color: var(--primary);
+  letter-spacing: -0.05em;
   text-transform: uppercase;
-  letter-spacing: 0.25em;
-  font-size: 2.5rem;
-  color: white;
-  padding-top: 0.2em;
-}
-
-.logo img {
-  height: 2.5rem;
-  vertical-align: bottom;
-  margin-right: 0.5rem;
-}
-
-.hamburger {
-  color: white;
-  width: 1em;
-  display: flex;
-  align-items: center;
-  justify-content: left;
-  padding: 0.5rem;
-  top: 0;
-  left: 0;
-  height: 2rem;
-  cursor: pointer;
-  font-size: 1.5rem;
+  margin: 0;
 }
 
 @media screen and (max-width:50em) {
@@ -152,18 +128,6 @@ header {
     display: flex;
     align-items: center;
     justify-content: center;
-  }
-
-  .hamburger::before {
-    content: "☰";
-  }
-
-  .close::before {
-    content: "✕";
-  }
-
-  .hide {
-    left: -12em;
   }
 }
 
