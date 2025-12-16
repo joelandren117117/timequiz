@@ -39,51 +39,50 @@
         <!---<img src="https://images.citybreakcdn.com/image.aspx?ImageId=8661679" class="picture"/>-->
     </aside>
 
-    <section class="map-container">
-        <h2>Karta</h2>
-        <div id="map"></div>
-        <div class="yearSlider">
-        <label for="yearRange">År: <strong>{{ yearGuess }}</strong></label>
-        <input 
-            type="range" 
-            id ="yearRange"
-            v-model.number="yearGuess"
-            min="1900" 
-            max="2024" 
-            step ="1"
+    <section class="map-section">
+        <h2>Player Guess Map</h2>
+        <LeafletMap
+          :center="initialCenter"
+          :zoom="4"
+          clickable
+          allowGuessMarker
+          :guessMarker="playerGuess"
+          @map-click="onPlayerMapClick"
+        />
+  
+        <p class="map-info">
+          Current guess:
+          <span v-if="playerGuess">
+            {{ playerGuess.lat.toFixed(3) }}, {{ playerGuess.lng.toFixed(3) }}
+          </span>
+          <span v-else>Click on the map to make a guess.</span>
+        </p>
+  
+        <button
+          class="submit-button"
+          :disabled="!playerGuess"
+          @click="submitGuess"
         >
-        <div class="slider-labels">
-            <span>1900</span>
-            <span>2025</span>
-        </div>
-        </div>
-      <div class="submitGuess">
-        <button class="button">
-          Submit Guess
+          Submit guess
         </button>
-      </div>
-    </section>
-    
+      </section>
 </main>
 
 </template>
 
 <script>
 import ResponsiveNav from '@/components/ResponsiveNav.vue';
+import LeafletMap from '@/components/LeafletMap.vue';
 import io from 'socket.io-client';
 import quizesData from '../../server/data/quizes.json';
 const socket = io("localhost:3000");
 
 export default {
-  name: 'StartView',
-  components: {
-    ResponsiveNav
-  },
-  data: function () {
+  name: 'GameView',
+  components: { ResponsiveNav, LeafletMap },
+  data() {
     const quiz = quizesData.quizes && quizesData.quizes[0] ? quizesData.quizes[0] : { questions: [] };
-    const firstQuestion = quiz.questions[0] || { year: 1960 };
-    const minYear = 1900;
-    const maxYear = 2025;
+    const firstQuestion = quiz.questions[0] || { year: 1960, location: { lat: 54, lng: 15 } };
     return {
       uiLabels: {},
       lang: localStorage.getItem("lang") || "en",
@@ -91,36 +90,42 @@ export default {
       qIndex: 0,
       yearGuess: firstQuestion.year || 1960,
       feedback: null,
-      minYear,
-      maxYear
-    }
+      minYear: 1900,
+      maxYear: 2025,
+      initialCenter: firstQuestion.location ? [firstQuestion.location.lat, firstQuestion.location.lng] : [54, 15],
+      playerGuess: null,
+      hideNav: true
+    };
   },
-computed: {
+  computed: {
     currentQuestion() {
-      return this.quiz.questions[this.qIndex] || { imageUrl: '', prompt: '', year: 1960 };
+      return (this.quiz && this.quiz.questions && this.quiz.questions[this.qIndex]) || { imageUrl: '', prompt: '', year: 1960, location: { lat: 54, lng: 15 } };
     }
   },
-
-  created: function () {
+  created() {
     socket.on("uiLabels", labels => this.uiLabels = labels);
     socket.emit("getUILabels", this.lang);
   },
   methods: {
-    switchLanguage: function () {
-      if (this.lang === "en") {
-        this.lang = "sv"
-      }
-      else {
-        this.lang = "en"
-      }
+    onPlayerMapClick(payload) {
+      // förväntar { lat, lng }
+      this.playerGuess = payload;
+    },
+    submitGuess() {
+      if (!this.playerGuess) return;
+      console.log('Submitting guess:', this.playerGuess);
+      alert(`Guess sent: ${this.playerGuess.lat.toFixed(3)}, ${this.playerGuess.lng.toFixed(3)}`);
+    },
+    switchLanguage() {
+      this.lang = this.lang === 'en' ? 'sv' : 'en';
       localStorage.setItem("lang", this.lang);
       socket.emit("getUILabels", this.lang);
     },
-    toggleNav: function () {
+    toggleNav() {
       this.hideNav = !this.hideNav;
     }
   }
-}
+};
 </script>
 <style scoped>
 .app-header {
@@ -169,11 +174,12 @@ computed: {
 }
 
 /* === Höger sida: karta === */
-.map-container {
-    background: lightblue;
-    padding: 1em;
-    border-radius: 1em;
-}
+.map-section {
+    background: #18181b;
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
 
 #map {
     width: 100%;
