@@ -7,8 +7,6 @@ src/views/CreateQuizView.vues<template>
         <span class="logo-full">TOAJMGUÄSSÄR</span>
       </h1>
     </header>
-
-    <!-- Quiz section (left column) -->
     <section class="quiz-section">
       <div class="quiz-name">Quiz Name</div>
 
@@ -36,6 +34,17 @@ src/views/CreateQuizView.vues<template>
     </section>
 
     <section class="question-editor">
+      <div class="photo Upload"> 
+
+        <div class="map-placeholder">
+          Photo Upload Placeholder
+        </div>
+
+        <button class="btn btn-primary" id="uploadPhotoBtn">
+          Upload Photo
+        </button>
+
+      </div>
       <div class="map-panel">
         <div class="map-container">
           <LeafletMap :center="[correctLocation.lat, correctLocation.lng]" :zoom="5" :markers="[
@@ -66,6 +75,7 @@ src/views/CreateQuizView.vues<template>
           </button>
         </div>
       </div>
+
     </section>
   </div>
 </template>
@@ -156,10 +166,9 @@ export default {
   display: inline;
 }
 
-/* Larger screens: quiz in left third, right side empty for now */
 @media (min-width: 900px) {
   .create-quiz-container {
-    grid-template-columns: 1fr 2fr;
+    grid-template-columns: 1fr 4fr;
     grid-template-rows: auto 1fr;
     grid-template-areas:
       "header header"
@@ -177,7 +186,6 @@ export default {
   }
 }
 
-/* ========== Header / Logo ========== */
 .app-header {
   grid-area: header;
   margin-bottom: 1rem;
@@ -192,11 +200,9 @@ export default {
   margin: 0;
 }
 
-/* ========== Quiz Layout (Flex inside grid) ========== */
 .quiz-section {
   grid-area: quiz;
 
-  /* FLEX LAYOUT INSIDE QUIZ SECTION */
   display: flex;
   flex-direction: column;
   gap: 2rem;
@@ -206,12 +212,10 @@ export default {
   padding: 2rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 
-  /* On small screens, center and constrain width a bit */
   max-width: 600px;
   margin: 0 2rem;
 }
 
-/* On larger screens, let quiz fill its grid column */
 @media (min-width: 900px) {
   .quiz-section {
     max-width: none;
@@ -220,7 +224,6 @@ export default {
   }
 }
 
-/* Title Bar */
 .quiz-name {
   background-color: var(--primary);
   color: var(--bg);
@@ -258,25 +261,39 @@ export default {
   background-color: var(--primary-soft);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
-
-/* ========== Right Side / Editor Placeholder ========== */
 .question-editor {
   grid-area: editor;
   display: block;
+  background-color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
 }
 
-/* Show the empty right side only on larger screens */
+.photo {
+
+  border-radius: 12px;
+  padding: 2rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
 @media (min-width: 900px) {
   .question-editor {
-    display: block;
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+  }
+
+  .photo, .map-panel {
+    flex: 1;
   }
 }
 
 .map-panel {
-  background-color: #FFFFFF;
   border-radius: 12px;
   padding: 2rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 
   max-width: 900px;
   margin: 0 auto;
@@ -311,6 +328,14 @@ export default {
 }
 
 .map-placeholder {
+  height: 480px;
+  border-radius: 12px;
+  border: 2px solid var(--primary, #4C9A4E);
+  background: #F7FAF5;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-weight: 600;
   opacity: 0.6;
 }
@@ -359,7 +384,6 @@ export default {
   transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.08s ease;
 }
 
-/* Nice focus even without script */
 .year-display:focus {
   border-color: var(--primary-dark, #2F6A33);
   box-shadow:
