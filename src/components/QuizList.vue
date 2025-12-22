@@ -115,12 +115,12 @@ const { quizes, selectedId } = toRefs(props);
 .quiz-radio {
   width: 18px;
   height: 18px;
-  accent-color: #ea3e34;
+  accent-color: var(--primary);
   flex-shrink: 0;
 }
 
 .quiz-item.selected {
-  border-color: #ea3e34;
-  box-shadow: 0 4px 10px rgba(234, 62, 52, 0.16);
+  border-color: var(--primary);
+  box-shadow: 0 4px 10px var(--primary-soft);
 }
 </style>

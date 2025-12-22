@@ -1,4 +1,4 @@
-src/views/CreateQuizView.vues<template>
+<template>
   <div class="create-quiz-container">
     <!-- Logo style title -->
     <header class="app-header">
@@ -34,16 +34,42 @@ src/views/CreateQuizView.vues<template>
     </section>
 
     <section class="question-editor">
-      <div class="photo Upload"> 
-
-        <div class="map-placeholder">
-          Photo Upload Placeholder
+      <div class="photo">
+        <div class="map-placeholder" @click="openPhotoPicker">
+          <template v-if="photoPreviewUrl">
+            <img
+              class="photo-preview-img"
+              :src="photoPreviewUrl"
+              alt="Selected photo preview"
+            />
+          </template>
+          <template v-else>
+            Photo Upload Placeholder
+          </template>
         </div>
 
-        <button class="btn btn-primary" id="uploadPhotoBtn">
-          Upload Photo
-        </button>
+        <!-- Hidden native file input (most compatible) -->
+        <input
+          ref="photoInput"
+          class="file-input"
+          type="file"
+          accept="image/*"
+          @change="onPhotoSelected"
+          @click="openPhotoPicker"
+        />
 
+        <div class="photo-actions">
+          <button class="btn btn-secondary" type="button" :disabled="!photoFile" @click="clearPhoto">
+            Remove
+          </button>
+        </div>
+
+        <div v-if="uploadedPhotoUrl" class="upload-status">
+          Uploaded: <span class="upload-url">{{ uploadedPhotoUrl }}</span>
+        </div>
+        <div v-if="photoUploadError" class="upload-status upload-error">
+          {{ photoUploadError }}
+        </div>
       </div>
       <div class="map-panel">
         <div class="map-container">
@@ -70,7 +96,7 @@ src/views/CreateQuizView.vues<template>
           <div class="year-range">1900 – 2025</div>
         </div>
         <div class="submitGuess">
-          <button class="btn btn-primary" id="saveQuestionBtn">
+          <button class="btn btn-primary" id="saveQuestionBtn" @click="saveQuestion">
             Save Question
           </button>
         </div>
@@ -86,6 +112,10 @@ import io from "socket.io-client";
 
 const socket = io("http://localhost:3000");
 
+// Change this to your backend route (or remove the upload button if you only need local preview)
+const UPLOAD_ENDPOINT = "/api/upload";
+const MAX_PHOTO_BYTES = 5 * 1024 * 1024; // 5MB
+
 export default {
   name: "CreateQuizView",
   components: {
@@ -99,6 +129,13 @@ export default {
       hideNav: true,
 
       yearGuess: 1960,
+
+      // Photo upload (native file input)
+      photoFile: null,
+      photoPreviewUrl: "",
+      uploadedPhotoUrl: "",
+      isUploadingPhoto: false,
+      photoUploadError: "",
 
       correctLocation: {
         lat: 48.8584,
@@ -124,6 +161,11 @@ export default {
   },
   beforeUnmount() {
     socket.off("uiLabels");
+
+    // Clean up object URL if we created one
+    if (this.photoPreviewUrl) {
+      URL.revokeObjectURL(this.photoPreviewUrl);
+    }
   },
   methods: {
     switchLanguage() {
@@ -133,6 +175,92 @@ export default {
     },
     toggleNav() {
       this.hideNav = !this.hideNav;
+    },
+
+    openPhotoPicker() {
+      this.$refs.photoInput?.click();
+    },
+
+    onPhotoSelected(e) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      // Basic validation
+      if (!file.type?.startsWith("image/")) {
+        this.photoUploadError = "Please choose an image file.";
+        e.target.value = "";
+        return;
+      }
+      if (file.size > MAX_PHOTO_BYTES) {
+        this.photoUploadError = "Image is too large (max 5MB).";
+        e.target.value = "";
+        return;
+      }
+
+      // Replace previous preview URL
+      if (this.photoPreviewUrl) {
+        URL.revokeObjectURL(this.photoPreviewUrl);
+      }
+
+      this.photoFile = file;
+      this.photoPreviewUrl = URL.createObjectURL(file);
+      this.uploadedPhotoUrl = "";
+      this.photoUploadError = "";
+    },
+
+    clearPhoto() {
+      if (this.photoPreviewUrl) {
+        URL.revokeObjectURL(this.photoPreviewUrl);
+      }
+      this.photoFile = null;
+      this.photoPreviewUrl = "";
+      this.uploadedPhotoUrl = "";
+      this.photoUploadError = "";
+
+      // Reset the input so selecting the same file again still triggers change
+      if (this.$refs.photoInput) {
+        this.$refs.photoInput.value = "";
+      }
+    },
+
+    async uploadPhoto() {
+      if (!this.photoFile || this.isUploadingPhoto) return;
+
+      this.isUploadingPhoto = true;
+      this.photoUploadError = "";
+      this.uploadedPhotoUrl = "";
+
+      try {
+        const formData = new FormData();
+        formData.append("image", this.photoFile);
+
+        const res = await fetch(UPLOAD_ENDPOINT, {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!res.ok) {
+          const text = await res.text().catch(() => "");
+          throw new Error(text || `Upload failed (${res.status})`);
+        }
+
+        // Expecting JSON like: { url: "https://..." }
+        const data = await res.json().catch(() => ({}));
+        this.uploadedPhotoUrl = data.url || "(Uploaded, but backend did not return a url)";
+      } catch (err) {
+        this.photoUploadError = err?.message || "Upload failed.";
+      } finally {
+        this.isUploadingPhoto = false;
+      }
+    },
+
+    async saveQuestion() {
+      // Upload photo if present
+      if (this.photoFile) {
+        await this.uploadPhoto();
+      }
+      // TODO: Implement saving the question data (e.g., yearGuess, correctLocation, uploadedPhotoUrl)
+      alert('Question saved!');
     },
   },
 };
@@ -190,16 +318,6 @@ export default {
   grid-area: header;
   margin-bottom: 1rem;
 }
-
-.logo-title {
-  font-size: 5rem;
-  font-weight: 900;
-  color: var(--primary);
-  letter-spacing: -0.05em;
-  text-transform: uppercase;
-  margin: 0;
-}
-
 .quiz-section {
   grid-area: quiz;
 
@@ -279,6 +397,40 @@ export default {
   gap: 1.5rem;
 }
 
+.file-input {
+  display: none;
+}
+
+.photo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.photo-preview-img {
+  width: 100%;
+  height: 100%;
+  max-height: 480px;
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+.upload-status {
+  font-size: 0.95rem;
+  opacity: 0.8;
+  word-break: break-word;
+}
+
+.upload-url {
+  font-weight: 700;
+}
+
+.upload-error {
+  opacity: 1;
+  color: #b00020;
+}
+
 @media (min-width: 900px) {
   .question-editor {
     display: flex;
@@ -338,6 +490,7 @@ export default {
   justify-content: center;
   font-weight: 600;
   opacity: 0.6;
+  cursor: pointer;
 }
 
 .year-control {

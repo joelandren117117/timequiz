@@ -76,16 +76,16 @@
         transition: background 0.2s ease, box-shadow 0.2s ease;
     }
     .primary-action-btn {
-        background-color: #EA3E34;
+        background-color: var(--primary);
         color: #FEFCEF;
         margin-top: 1.5rem;
     }
     .primary-action-btn:hover:not(:disabled) {
-        background-color: #D7382F;
-        box-shadow: 0 4px 10px rgba(234, 62, 52, 0.25);
+        background-color: var(--primary-dark);
+        box-shadow: 0 4px 10px var(--primary-soft);
     }
     .primary-action-btn:disabled {
-        background-color: #f7a9a9;
+        background-color: var(--surface);
         cursor: not-allowed;
     }
     
