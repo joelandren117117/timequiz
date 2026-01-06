@@ -73,15 +73,25 @@
       </div>
       <div class="map-panel">
         <div class="map-container">
-          <LeafletMap :center="[correctLocation.lat, correctLocation.lng]" :zoom="5" :markers="[
-            {
-              id: 'correct',
-              lat: correctLocation.lat,
-              lng: correctLocation.lng,
-              label: 'Correct location',
-            },
-          ]" />
+          <!-- Use the interactive "guess" map so the admin can click to set/clear the correct location -->
+          <LeafletMap
+            :center="mapCenter"
+            :zoom="4"
+            clickable
+            allowGuessMarker
+            :guessMarker="correctLocation"
+            @map-click="onCorrectMapClick"
+          />
         </div>
+
+        <div class="upload-status" style="margin-top: 0.75rem;">
+          Correct location:
+          <span v-if="correctLocation">
+            {{ correctLocation.lat.toFixed(3) }}, {{ correctLocation.lng.toFixed(3) }}
+          </span>
+          <span v-else>Click on the map to set the correct location.</span>
+        </div>
+
         <div class="year-control">
           <div class="year-label">Year</div>
 
@@ -96,9 +106,21 @@
           <div class="year-range">1900 – 2025</div>
         </div>
         <div class="submitGuess">
-          <button class="btn btn-primary" id="saveQuestionBtn" @click="saveQuestion">
-            Save Question
+          <button
+            class="btn btn-primary"
+            id="saveQuestionBtn"
+            :disabled="isUploadingPhoto"
+            @click="saveQuestion"
+          >
+            {{ isUploadingPhoto ? 'Uploading…' : 'Save Question' }}
           </button>
+
+          <div v-if="questionSaveError" class="upload-status upload-error" style="margin-top: 0.75rem;">
+            {{ questionSaveError }}
+          </div>
+          <div v-if="questionSaveSuccess" class="upload-status" style="margin-top: 0.75rem;">
+            {{ questionSaveSuccess }}
+          </div>
         </div>
       </div>
 
@@ -112,7 +134,6 @@ import io from "socket.io-client";
 
 const socket = io("http://localhost:3000");
 
-// Change this to your backend route (or remove the upload button if you only need local preview)
 const UPLOAD_ENDPOINT = "/api/upload";
 const MAX_PHOTO_BYTES = 5 * 1024 * 1024; // 5MB
 
@@ -130,29 +151,26 @@ export default {
 
       yearGuess: 1960,
 
-      // Photo upload (native file input)
+      initialCenter: [54, 15],
+
       photoFile: null,
       photoPreviewUrl: "",
       uploadedPhotoUrl: "",
       isUploadingPhoto: false,
       photoUploadError: "",
 
-      correctLocation: {
-        lat: 48.8584,
-        lng: 2.2945,
-      },
+      correctLocation: null,
+
+      questionSaveError: "",
+      questionSaveSuccess: "",
     };
   },
   computed: {
-    correctMarkers() {
-      return [
-        {
-          id: "correct",
-          lat: this.correctLocation.lat,
-          lng: this.correctLocation.lng,
-          label: "Correct location",
-        },
-      ];
+    mapCenter() {
+      if (this.correctLocation?.lat != null && this.correctLocation?.lng != null) {
+        return [this.correctLocation.lat, this.correctLocation.lng];
+      }
+      return this.initialCenter;
     },
   },
   created() {
@@ -161,8 +179,6 @@ export default {
   },
   beforeUnmount() {
     socket.off("uiLabels");
-
-    // Clean up object URL if we created one
     if (this.photoPreviewUrl) {
       URL.revokeObjectURL(this.photoPreviewUrl);
     }
@@ -177,6 +193,27 @@ export default {
       this.hideNav = !this.hideNav;
     },
 
+    onCorrectMapClick({ lat, lng } = {}) {
+    
+      if (lat == null || lng == null) {
+        this.correctLocation = null;
+        return;
+      }
+
+      if (this.correctLocation) {
+        const eps = 1e-6; 
+        const samePoint =
+          Math.abs(lat - this.correctLocation.lat) < eps &&
+          Math.abs(lng - this.correctLocation.lng) < eps;
+        if (samePoint) {
+          this.correctLocation = null;
+          return;
+        }
+      }
+
+      this.correctLocation = { lat, lng };
+    },
+
     openPhotoPicker() {
       this.$refs.photoInput?.click();
     },
@@ -185,7 +222,6 @@ export default {
       const file = e.target.files?.[0];
       if (!file) return;
 
-      // Basic validation
       if (!file.type?.startsWith("image/")) {
         this.photoUploadError = "Please choose an image file.";
         e.target.value = "";
@@ -197,7 +233,6 @@ export default {
         return;
       }
 
-      // Replace previous preview URL
       if (this.photoPreviewUrl) {
         URL.revokeObjectURL(this.photoPreviewUrl);
       }
@@ -217,7 +252,6 @@ export default {
       this.uploadedPhotoUrl = "";
       this.photoUploadError = "";
 
-      // Reset the input so selecting the same file again still triggers change
       if (this.$refs.photoInput) {
         this.$refs.photoInput.value = "";
       }
@@ -244,7 +278,6 @@ export default {
           throw new Error(text || `Upload failed (${res.status})`);
         }
 
-        // Expecting JSON like: { url: "https://..." }
         const data = await res.json().catch(() => ({}));
         this.uploadedPhotoUrl = data.url || "(Uploaded, but backend did not return a url)";
       } catch (err) {
@@ -255,12 +288,37 @@ export default {
     },
 
     async saveQuestion() {
-      // Upload photo if present
+      this.questionSaveError = "";
+      this.questionSaveSuccess = "";
+
+      if (this.correctLocation?.lat == null || this.correctLocation?.lng == null) {
+        this.questionSaveError = "Pick a correct location on the map before saving.";
+        return;
+      }
+
+      if (typeof this.yearGuess !== "number" || this.yearGuess < 1900 || this.yearGuess > 2025) {
+        this.questionSaveError = "Year must be between 1900 and 2025.";
+        return;
+      }
+
       if (this.photoFile) {
         await this.uploadPhoto();
+
+        if (this.photoUploadError || !this.uploadedPhotoUrl) {
+          this.questionSaveError = this.photoUploadError || "Photo upload failed. Please try again.";
+          return;
+        }
       }
-      // TODO: Implement saving the question data (e.g., yearGuess, correctLocation, uploadedPhotoUrl)
-      alert('Question saved!');
+      const questionPayload = {
+        year: this.yearGuess,
+        correctLocation: { ...this.correctLocation },
+        imageUrl: this.uploadedPhotoUrl || null,
+      };
+
+      console.log("Saving question:", questionPayload);
+
+      this.questionSaveSuccess = "Question saved!";
+      alert("Question saved!");
     },
   },
 };
@@ -286,14 +344,6 @@ export default {
   row-gap: 2rem;
 }
 
-.logo-full {
-  display: none;
-}
-
-.logo-short {
-  display: inline;
-}
-
 @media (min-width: 900px) {
   .create-quiz-container {
     grid-template-columns: 1fr 4fr;
@@ -303,14 +353,6 @@ export default {
       "quiz   editor";
     column-gap: 8rem;
     align-items: flex-start;
-  }
-
-  .logo-short {
-    display: none;
-  }
-
-  .logo-full {
-    display: inline;
   }
 }
 

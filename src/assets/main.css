@@ -1,12 +1,13 @@
 @import './base.css';
 
-:root {
+:root { 
   --bg: #f3feef;
   --surface: #ffffff;
   --text: #1D1C1B;
 
   --primary: #39643a;
   --primary-dark: #225b24;
+  --primary-dark-dark: #072b09;
   --primary-soft: rgba(41, 77, 25, 0.08);
   --primary-soft-strong: rgba(128, 200, 96, 0.16);
 }
@@ -35,6 +36,29 @@
   text-transform: uppercase;
   margin: 0;
 }
+
+.app-header {
+  margin-bottom: 1rem;
+}
+
+.logo-full {
+  display: none;
+}
+
+.logo-short {
+  display: inline;
+}
+
+@media (min-width: 900px) {
+  .logo-short {
+    display: none;
+  }
+
+  .logo-full {
+    display: inline;
+  }
+}
+
 
 .btn-primary {
   background-color: var(--primary);

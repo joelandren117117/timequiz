@@ -37,7 +37,7 @@
         </button>
         <button
           v-else
-          class="cta ghost"
+          class="cta ghost btn-thirdary"
           :disabled="lobby.status !== 'started'"
           @click="goToGame"
         >
@@ -191,15 +191,15 @@ watch(
   border: none;
   font-weight: 700;
   cursor: pointer;
-  background: #ea3e34;
+  background: var(--primary-dark);
   color: #fff;
   transition: transform 0.1s ease, box-shadow 0.2s ease, opacity 0.2s ease;
 }
 
 .cta.ghost {
   background: #fff;
-  color: #ea3e34;
-  border: 1px solid #ea3e34;
+  color: var(--primary-dark-dark);
+  border: 1px solid var(--primary-dark-dark);
 }
 
 .cta:disabled {
@@ -210,7 +210,7 @@ watch(
 
 .cta:not(:disabled):hover {
   transform: translateY(-1px);
-  box-shadow: 0 10px 20px rgba(234, 62, 52, 0.22);
+  box-shadow: 0 10px 20px var(--primary-dark-dark);
 }
 
 .lobby-missing {
