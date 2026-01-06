@@ -26,8 +26,7 @@
         </div>
       </div>
   </template>
-
-  <style scoped>
+<style scoped>
 
   .home-container {
       background-color: var(--bg);
