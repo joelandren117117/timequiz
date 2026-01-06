@@ -32,7 +32,7 @@
         <ul class="players">
           <li v-for="player in players" :key="player.id">
             <span class="pname">{{ player.name }}</span>
-            <span class="pscore">Player</span>
+            <span class="pscore">{{ player.points }} pts</span>
           </li>
         </ul>
       </section>
@@ -87,7 +87,15 @@ const questionCount = computed(
 );
 const isFinished = computed(() => lobby.value?.status === 'finished');
 
-const players = computed(() => lobby.value?.players || []);
+const players = computed(() => {
+  if (!lobby.value) return [];
+  return (lobby.value.players || []).map(p => ({
+    id: p.id,
+    name: p.name,
+    points: p.points || 0,
+  }))
+  .sort((a, b) => b.points - a.points);
+});
 const adminMarkers = computed(() =>
   (lobby.value?.guesses || []).map((g) => ({
     id: `g-${g.playerId}`,

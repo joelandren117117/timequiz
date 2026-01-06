@@ -64,17 +64,13 @@ export default {
     currentLobby() {
         return getLobby(this.lobbyId);
     },
-    players() { 
-        const lobby = this.currentLobby;
-        if (!lobby) return [];
-
-        const participants = [
-            { id: lobby.host.id, namn: lobby.host.name, points: lobby.host.points || 0 },
-            ...lobby.players.map(p => ({ id: p.id, namn: p.name, points: p.points || 0 }))
-        ];
-
-        return participants.sort((a, b) => b.points - a.points);
-    }
+    players() {
+  const lobby = this.currentLobby;
+  if (!lobby) return [];
+  return (lobby.players || [])
+    .map(p => ({ id: p.id, namn: p.name, points: p.points || 0 }))
+    .sort((a, b) => b.points - a.points);
+}
   },
   created() {
     this.lobbyId = this.$route.query.lobby || this.$route.params.id || null;
@@ -103,6 +99,7 @@ export default {
     
     playAgain() {
       console.log(`Sending command: Play Again for Lobby ${this.lobbyId}`);
+      this.$router.push('/play');
     }
   }
 }
