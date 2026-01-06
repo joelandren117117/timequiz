@@ -37,7 +37,7 @@
         </button>
         <button
           v-else
-          class="cta ghost"
+          class="cta ghost btn-thirdary"
           :disabled="lobby.status !== 'started'"
           @click="goToGame"
         >
@@ -54,9 +54,9 @@
 </template>
 
 <script setup>
-import { computed, watch } from 'vue';
+import { computed, watch, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { getLobby, startLobby } from '@/stores/lobbyStore';
+import { getLobby, startLobby, fetchLobby } from '@/stores/lobbyStore';
 
 const route = useRoute();
 const router = useRouter();
@@ -69,13 +69,21 @@ const isHost = computed(() => playerId.value === 1);
 
 const goToGame = () => {
   if (!lobby.value) return;
-  router.push({ path: isHost.value ? '/host' : '/game', query: route.query });
+  const nextQuery = {
+    ...route.query,
+    quiz: lobby.value?.quizId || route.query.quiz,
+  };
+  router.push({ path: isHost.value ? '/host' : '/game', query: nextQuery });
 };
 
-const startGame = () => {
+const startGame = async () => {
   if (!lobby.value) return;
-  startLobby(lobby.value.id);
-  goToGame();
+  try {
+    await startLobby(lobby.value.id);
+    goToGame();
+  } catch (err) {
+    console.warn('Failed to start lobby', err);
+  }
 };
 
 // Auto-route non-hosts when host starts
@@ -87,6 +95,22 @@ watch(
     }
   }
 );
+
+onMounted(() => {
+  if (lobbyId.value) {
+    fetchLobby(lobbyId.value).catch((err) => {
+      console.warn('Failed to load lobby', err);
+    });
+  }
+});
+
+watch(lobbyId, (id) => {
+  if (id) {
+    fetchLobby(id).catch((err) => {
+      console.warn('Failed to load lobby', err);
+    });
+  }
+});
 </script>
 
 <style scoped>
@@ -191,15 +215,15 @@ watch(
   border: none;
   font-weight: 700;
   cursor: pointer;
-  background: #ea3e34;
+  background: var(--primary-dark);
   color: #fff;
   transition: transform 0.1s ease, box-shadow 0.2s ease, opacity 0.2s ease;
 }
 
 .cta.ghost {
   background: #fff;
-  color: #ea3e34;
-  border: 1px solid #ea3e34;
+  color: var(--primary-dark-dark);
+  border: 1px solid var(--primary-dark-dark);
 }
 
 .cta:disabled {
@@ -210,7 +234,7 @@ watch(
 
 .cta:not(:disabled):hover {
   transform: translateY(-1px);
-  box-shadow: 0 10px 20px rgba(234, 62, 52, 0.22);
+  box-shadow: 0 10px 20px var(--primary-dark-dark);
 }
 
 .lobby-missing {

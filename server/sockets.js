@@ -1,4 +1,123 @@
+import {
+  createLobby,
+  getLobby,
+  joinLobby,
+  startLobby,
+  advanceQuestion,
+  submitGuess,
+} from "./lobbyStore.js";
+
 function sockets(io, socket, data) {
+  socket.on("lobby:create", (payload, ack) => {
+    try {
+      const { quizId, hostName } = payload || {};
+      const { lobby, playerId } = createLobby(quizId, hostName);
+      socket.join(lobby.id);
+      io.to(lobby.id).emit("lobby:update", lobby);
+      if (typeof ack === "function") {
+        ack({ ok: true, lobby, playerId });
+      }
+    } catch (err) {
+      if (typeof ack === "function") {
+        ack({ ok: false, error: err.message || "Failed to create lobby." });
+      }
+    }
+  });
+
+  socket.on("lobby:get", (payload, ack) => {
+    try {
+      const lobbyId = typeof payload === "string" ? payload : payload?.lobbyId;
+      const lobby = getLobby(lobbyId);
+      if (!lobby) {
+        throw new Error("Lobby not found.");
+      }
+      socket.join(lobby.id);
+      if (typeof ack === "function") {
+        ack({ ok: true, lobby });
+      }
+    } catch (err) {
+      if (typeof ack === "function") {
+        ack({ ok: false, error: err.message || "Failed to load lobby." });
+      }
+    }
+  });
+
+  socket.on("lobby:join", (payload, ack) => {
+    try {
+      const lobbyId = payload?.id || payload?.lobbyId;
+      const name = payload?.name;
+      const { lobby, playerId } = joinLobby(lobbyId, name);
+      socket.join(lobby.id);
+      io.to(lobby.id).emit("lobby:update", lobby);
+      if (typeof ack === "function") {
+        ack({ ok: true, lobby, playerId });
+      }
+    } catch (err) {
+      if (typeof ack === "function") {
+        ack({ ok: false, error: err.message || "Failed to join lobby." });
+      }
+    }
+  });
+
+  socket.on("lobby:start", (payload, ack) => {
+    try {
+      const lobbyId = payload?.lobbyId || payload?.id || payload;
+      const lobby = startLobby(lobbyId);
+      io.to(lobby.id).emit("lobby:update", lobby);
+      if (typeof ack === "function") {
+        ack({ ok: true, lobby });
+      }
+    } catch (err) {
+      if (typeof ack === "function") {
+        ack({ ok: false, error: err.message || "Failed to start lobby." });
+      }
+    }
+  });
+
+  socket.on("lobby:previous", (payload, ack) => {
+    try {
+      const lobbyId = payload?.lobbyId || payload?.id || payload;
+      const lobby = advanceQuestion(lobbyId, -1);
+      io.to(lobby.id).emit("lobby:update", lobby);
+      if (typeof ack === "function") {
+        ack({ ok: true, lobby });
+      }
+    } catch (err) {
+      if (typeof ack === "function") {
+        ack({ ok: false, error: err.message || "Failed to move question." });
+      }
+    }
+  });
+
+  socket.on("lobby:next", (payload, ack) => {
+    try {
+      const lobbyId = payload?.lobbyId || payload?.id || payload;
+      const lobby = advanceQuestion(lobbyId, 1);
+      io.to(lobby.id).emit("lobby:update", lobby);
+      if (typeof ack === "function") {
+        ack({ ok: true, lobby });
+      }
+    } catch (err) {
+      if (typeof ack === "function") {
+        ack({ ok: false, error: err.message || "Failed to move question." });
+      }
+    }
+  });
+
+  socket.on("lobby:submitGuess", (payload, ack) => {
+    try {
+      const lobbyId = payload?.lobbyId || payload?.id;
+      const { lobby, guess } = submitGuess(lobbyId, payload);
+      io.to(lobby.id).emit("lobby:update", lobby);
+      if (typeof ack === "function") {
+        ack({ ok: true, lobby, guess });
+      }
+    } catch (err) {
+      if (typeof ack === "function") {
+        ack({ ok: false, error: err.message || "Failed to submit guess." });
+      }
+    }
+  });
   
   socket.on('getUILabels', function(lang) {
     socket.emit('uiLabels', data.getUILabels(lang));

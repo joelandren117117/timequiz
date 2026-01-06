@@ -4,7 +4,7 @@
       <h1 class="logo-title">TIMEGUESSR</h1>
     </header>
 
-    <div class="results-wrapper">
+    <div class="results-wrapper" v-if="currentLobby">
       <h2 class="section-title">Final Results</h2>
       
       <div class="player-list">
@@ -35,11 +35,21 @@
       </div>
       
     </div>
+
+    <div class="results-wrapper" v-else>
+      <h2 class="section-title">Results Unavailable</h2>
+      <p>Lobby not found.</p>
+      <div class="button-row">
+        <button class="action-btn primary-action-btn" @click="goHome">
+          Go Home
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-import { getLobby } from '@/stores/lobbyStore.js'; 
+import { getLobby, fetchLobby } from '@/stores/lobbyStore.js'; 
 import { computed } from 'vue';
 
 
@@ -67,7 +77,12 @@ export default {
     }
   },
   created() {
-    this.lobbyId = this.$route.params.id;
+    this.lobbyId = this.$route.query.lobby || this.$route.params.id || null;
+    if (this.lobbyId) {
+      fetchLobby(this.lobbyId).catch((err) => {
+        console.warn('Failed to load lobby results', err);
+      });
+    }
   },
   methods:{
     getRankClass(index) {
