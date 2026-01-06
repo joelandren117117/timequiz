@@ -67,7 +67,7 @@ defineEmits(['update:modelValue']);
   -webkit-appearance: none;
   height: 10px;
   border-radius: 999px;
-  background: linear-gradient(90deg, #ea3e34, #f59e0b);
+  background: red;
   outline: none;
   accent-color: #ea3e34;
 }

@@ -18,10 +18,11 @@
           <button class="host-btn" :disabled="!canPrevious" @click="handlePrevious">
             Previous
           </button>
-          <button class="host-btn">Edit players</button>
-          <button class="host-btn">Back</button>
           <button class="host-btn" :disabled="!canNext" @click="handleNext">
             Next
+          </button>
+          <button class="big-host-btn" @click="goToResults">
+            End Game
           </button>
         </div>
       </section>
@@ -199,6 +200,18 @@ if (!lobby.value) {
 }
 
 .host-btn {
+  height: 5.25rem;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  font-weight: 600;
+}
+.big-host-btn {
+  grid-column: span 2;
   height: 5.25rem;
   border-radius: 0.75rem;
   display: flex;
