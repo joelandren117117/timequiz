@@ -14,6 +14,11 @@ function sockets(io, socket, data) {
     socket.emit('questionUpdate', data.activateQuestion(d.pollId));
   });
 
+  socket.on('playerGuess', function(d) {
+  if (!d || !d.pollId) return;
+  io.to(d.pollId).emit('playerGuess', d);
+});
+
   socket.on('joinPoll', function(pollId) {
     socket.join(pollId);
     socket.emit('questionUpdate', data.activateQuestion(pollId))

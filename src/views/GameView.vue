@@ -111,6 +111,15 @@ export default {
       alert(`Guess sent:
 Location: ${this.playerGuess.lat.toFixed(3)}, ${this.playerGuess.lng.toFixed(3)}
 Year: ${this.yearGuess}`);
+socket.emit('playerGuess', {
+        pollId,
+        playerId,
+        name: this.$route.query.name || null,
+        lat: this.playerGuess.lat,
+        lng: this.playerGuess.lng,
+        year: this.yearGuess
+      });
+    
     },
     switchLanguage() {
       this.lang = this.lang === 'en' ? 'sv' : 'en';
@@ -211,7 +220,7 @@ Year: ${this.yearGuess}`);
 
 .year-guess__label strong {
   font-size: 1.2rem;
-  color: #fde68a;
+  color: white;
   font-variant-numeric: tabular-nums;
 }
 
@@ -221,7 +230,7 @@ Year: ${this.yearGuess}`);
   height: 10px;
   margin: 0.65rem 0 0.35rem;
   border-radius: 999px;
-  background: linear-gradient(90deg, #6366f1, #22d3ee);
+  background: red;
   outline: none;
 }
 
@@ -232,7 +241,7 @@ Year: ${this.yearGuess}`);
   height: 22px;
   border-radius: 50%;
   background: #0f172a;
-  border: 3px solid #22d3ee;
+  border: 3px solid white;
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
   cursor: pointer;
   transition: transform 0.1s ease, box-shadow 0.1s ease;
@@ -248,7 +257,7 @@ Year: ${this.yearGuess}`);
   height: 22px;
   border-radius: 50%;
   background: #0f172a;
-  border: 3px solid #22d3ee;
+  border: 3px solid white;
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
   cursor: pointer;
   transition: transform 0.1s ease, box-shadow 0.1s ease;
@@ -271,7 +280,7 @@ Year: ${this.yearGuess}`);
   padding: 0.9rem 1rem;
   border: none;
   border-radius: 999px;
-  background: linear-gradient(120deg, #22d3ee, #6366f1 55%, #a855f7);
+  background: green;
   color: #0b1021;
   font-weight: 800;
   letter-spacing: 0.03em;

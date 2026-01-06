@@ -14,7 +14,7 @@
           <button class="host-btn">Previous</button>
           <button class="host-btn">Edit players</button>
           <button class="host-btn">Back</button>
-          <button class="host-btn">Next</button>
+          <button class="host-btn" @click="nextQuestion">Next</button>
         </div>
       </section>
 
@@ -23,7 +23,9 @@
         <ul class="players">
           <li v-for="player in players" :key="player.id">
             <span class="pname">{{ player.name }}</span>
-            <span class="pscore">Player</span>
+            <span class="pscore">Player
+              {{ player.points || 0 }} pts
+            </span>
           </li>
         </ul>
       </section>
@@ -203,7 +205,6 @@ if (!lobby.value) {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  background: #0f172a;
 }
 
 .map-wrapper {
