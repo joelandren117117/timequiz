@@ -1,17 +1,18 @@
-import { io } from 'socket.io-client';
+import { io } from "socket.io-client";
+import { SOCKET_SERVER_URL } from "./socketConfig";
 
-const SOCKET_SERVER_URL = "http://localhost:3000"; 
-const socket = io(SOCKET_SERVER_URL);
+const socket = io(SOCKET_SERVER_URL, { autoConnect: true });
 
-export const joinLobby = (lobbyId, playerName) => {
-    socket.emit('lobby:join', { 
-        id: lobbyId, 
-        name: playerName 
+const emitWithAck = (event, payload, timeout = 5000) =>
+  new Promise((resolve, reject) => {
+    socket.timeout(timeout).emit(event, payload, (err, response) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(response);
+      }
     });
-};
+  });
 
-export const onLobbyJoined = (callback) => {
-    socket.on('lobby:joined', callback);
-};
-
+export { socket, emitWithAck };
 export default socket;

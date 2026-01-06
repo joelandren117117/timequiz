@@ -108,9 +108,10 @@
 
 <script>
 import LeafletMap from "../components/LeafletMap.vue";
-import io from "socket.io-client";
+import { io } from "socket.io-client";
+import { SOCKET_SERVER_URL } from "@/services/socketConfig";
 
-const socket = io("http://localhost:3000");
+const socket = io(SOCKET_SERVER_URL);
 
 // Change this to your backend route (or remove the upload button if you only need local preview)
 const UPLOAD_ENDPOINT = "/api/upload";

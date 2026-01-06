@@ -15,12 +15,27 @@
 
     <section class="map-section">
         <h2>Player Guess Map</h2>
+        <div class="game-status error" v-if="!lobby">
+          Lobby not found.
+        </div>
+        <div class="game-status done" v-else-if="isFinished">
+          Game finished. Thanks for playing!
+          <button class="results-btn" @click="goToResults">View Results</button>
+        </div>
+        <div class="game-status waiting" v-else-if="!isGameActive">
+          Waiting for host to start the game...
+        </div>
+
+        <p class="question-progress" v-if="questionCount">
+          Question {{ questionNumber }} of {{ questionCount }}
+        </p>
+
         <div class="map-container ">
         <LeafletMap
-          :center="initialCenter"
+          :center="mapCenter"
           :zoom="4"
-          clickable
-          allowGuessMarker
+          :clickable="isGameActive"
+          :allowGuessMarker="isGameActive"
           :guessMarker="playerGuess"
           @map-click="onPlayerMapClick"
         />
@@ -45,6 +60,7 @@
             :max="maxYear"
             v-model.number="yearGuess"
             class="slider"
+            :disabled="!isGameActive || isFinished"
           />
           <div class="year-guess__scale">
             <span>{{ minYear }}</span>
@@ -54,63 +70,157 @@
   
         <button
           class="submit-button"
-          :disabled="!playerGuess"
+          :disabled="!playerGuess || !isGameActive || isFinished"
           @click="submitGuess"
         >
           Make My Guess
         </button>
+
+        <p v-if="feedback" class="feedback">{{ feedback }}</p>
       </section>
 </main>
 
 </template>
 
 <script>
-import ResponsiveNav from '@/components/ResponsiveNav.vue';
 import LeafletMap from '@/components/LeafletMap.vue';
-import io from 'socket.io-client';
 import quizesData from '../../server/data/quizes.json';
-const socket = io("localhost:3000");
+import socket from '@/services/socketService';
+import { fetchLobby, getLobby, submitGuess } from '@/stores/lobbyStore';
+
+const fallbackQuestion = {
+  imageUrl: '',
+  prompt: '',
+  year: 1960,
+  location: { lat: 54, lng: 15 },
+};
 
 export default {
   name: 'GameView',
-  components: { ResponsiveNav, LeafletMap },
+  components: { LeafletMap },
   data() {
-    const quiz = quizesData.quizes && quizesData.quizes[0] ? quizesData.quizes[0] : { questions: [] };
-    const firstQuestion = quiz.questions[0] || { year: 1960, location: { lat: 54, lng: 15 } };
     return {
       uiLabels: {},
       lang: localStorage.getItem("lang") || "en",
-      quiz,
-      qIndex: 0,
-      yearGuess: firstQuestion.year || 1960,
+      yearGuess: 1900,
       feedback: null,
       minYear: 1900,
       maxYear: 2025,
-      initialCenter: firstQuestion.location ? [firstQuestion.location.lat, firstQuestion.location.lng] : [54, 15],
       playerGuess: null,
+      hasSubmitted: false,
       hideNav: true
     };
   },
   computed: {
+    lobbyId() {
+      return this.$route.query.lobby;
+    },
+    playerId() {
+      return Number(this.$route.query.player);
+    },
+    lobby() {
+      return getLobby(this.lobbyId);
+    },
+    quizId() {
+      return this.lobby?.quizId || this.$route.query.quiz;
+    },
+    quiz() {
+      return (
+        quizesData.quizes?.find((q) => q.id === this.quizId) ||
+        quizesData.quizes?.[0] ||
+        { questions: [] }
+      );
+    },
+    currentQuestionIndex() {
+      return this.lobby?.currentQuestionIndex ?? 0;
+    },
     currentQuestion() {
-      return (this.quiz && this.quiz.questions && this.quiz.questions[this.qIndex]) || { imageUrl: '', prompt: '', year: 1960, location: { lat: 54, lng: 15 } };
+      return this.quiz?.questions?.[this.currentQuestionIndex] || fallbackQuestion;
+    },
+    questionCount() {
+      return this.quiz?.questions?.length ?? 0;
+    },
+    questionNumber() {
+      return this.currentQuestionIndex + 1;
+    },
+    isLastQuestion() {
+      return this.questionCount > 0 && this.currentQuestionIndex >= this.questionCount - 1;
+    },
+    mapCenter() {
+      return this.currentQuestion.location
+        ? [this.currentQuestion.location.lat, this.currentQuestion.location.lng]
+        : [54, 15];
+    },
+    isGameActive() {
+      return this.lobby?.status === 'started';
+    },
+    isFinished() {
+      return this.lobby?.status === 'finished';
     }
   },
   created() {
     socket.on("uiLabels", labels => this.uiLabels = labels);
     socket.emit("getUILabels", this.lang);
   },
+  watch: {
+    lobbyId: {
+      handler(newId) {
+        if (!newId) return;
+        fetchLobby(newId).catch((err) => {
+          console.warn("Failed to load lobby", err);
+        });
+      },
+      immediate: true
+    },
+    currentQuestionIndex: {
+      handler() {
+        this.playerGuess = null;
+        this.hasSubmitted = false;
+        this.feedback = null;
+        if (this.currentQuestion?.year) {
+          this.yearGuess = this.currentQuestion.year;
+        }
+      },
+      immediate: true
+    },
+    isFinished: {
+      handler(isFinished) {
+        if (isFinished) {
+          this.feedback = null;
+        }
+      }
+    }
+  },
   methods: {
     onPlayerMapClick(payload) {
-      // förväntar { lat, lng }
+      if (!this.isGameActive || this.isFinished) return;
       this.playerGuess = payload;
     },
-    submitGuess() {
-      if (!this.playerGuess) return;
-      console.log('Submitting guess:', this.playerGuess, 'year', this.yearGuess);
-      alert(`Guess sent:
-Location: ${this.playerGuess.lat.toFixed(3)}, ${this.playerGuess.lng.toFixed(3)}
-Year: ${this.yearGuess}`);
+    async submitGuess() {
+      if (!this.playerGuess || !this.isGameActive || this.isFinished) return;
+      try {
+        await submitGuess(this.lobbyId, {
+          playerId: this.playerId,
+          lat: this.playerGuess.lat,
+          lng: this.playerGuess.lng,
+          year: this.yearGuess,
+        });
+        this.hasSubmitted = true;
+        this.feedback = this.isLastQuestion
+          ? null
+          : "Guess submitted! Waiting for next question.";
+      } catch (err) {
+        this.feedback = err.message || "Failed to submit guess.";
+      }
+    },
+    goToResults() {
+      this.$router.push({
+        path: '/result',
+        query: {
+          lobby: this.lobbyId,
+          quiz: this.quizId,
+        },
+      });
     },
     switchLanguage() {
       this.lang = this.lang === 'en' ? 'sv' : 'en';
@@ -175,6 +285,51 @@ Year: ${this.yearGuess}`);
     border-radius: 12px;
     padding: 1rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  .game-status {
+    margin-bottom: 0.75rem;
+    padding: 0.6rem 0.9rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  .game-status.waiting {
+    background: rgba(234, 179, 8, 0.12);
+    color: #fde68a;
+    border: 1px solid rgba(234, 179, 8, 0.4);
+  }
+  .game-status.done {
+    background: rgba(34, 197, 94, 0.12);
+    color: #86efac;
+    border: 1px solid rgba(34, 197, 94, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+  .game-status.error {
+    background: rgba(239, 68, 68, 0.12);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+  }
+  .question-progress {
+    margin: 0 0 0.75rem;
+    color: #e5e7eb;
+    font-weight: 600;
+  }
+  .feedback {
+    margin-top: 0.75rem;
+    color: #a5f3fc;
+    font-weight: 600;
+  }
+  .results-btn {
+    background: #22c55e;
+    color: #0f172a;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: 999px;
+    font-weight: 700;
+    cursor: pointer;
   }
   .map-container{
     height: 400px;

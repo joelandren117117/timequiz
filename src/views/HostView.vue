@@ -7,14 +7,22 @@
   </header>
 
   <main class="layout" v-if="lobby">
+    <div class="host-banner finished" v-if="isFinished">
+      <span>Game finished.</span>
+      <button class="host-banner-btn" @click="goToResults">View Results</button>
+    </div>
     <!-- Left column: host controls + participants -->
     <div class="left-column">
       <section class="host-box">
         <div class="host-grid" role="group" aria-label="Host controls">
-          <button class="host-btn">Previous</button>
+          <button class="host-btn" :disabled="!canPrevious" @click="handlePrevious">
+            Previous
+          </button>
           <button class="host-btn">Edit players</button>
           <button class="host-btn">Back</button>
-          <button class="host-btn">Next</button>
+          <button class="host-btn" :disabled="!canNext" @click="handleNext">
+            Next
+          </button>
         </div>
       </section>
 
@@ -51,16 +59,32 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import LeafletMap from '../components/LeafletMap.vue';
-import { getLobby } from '@/stores/lobbyStore';
+import quizesData from '../../server/data/quizes.json';
+import {
+  fetchLobby,
+  getLobby,
+  nextQuestion,
+  previousQuestion,
+} from '@/stores/lobbyStore';
 
 const route = useRoute();
 const router = useRouter();
-
 const lobbyId = computed(() => route.query.lobby);
 const lobby = computed(() => getLobby(lobbyId.value));
+const quizId = computed(() => lobby.value?.quizId || route.query.quiz);
+const quiz = computed(
+  () => quizesData.quizes?.find((q) => q.id === quizId.value) || null
+);
+const currentQuestionIndex = computed(
+  () => lobby.value?.currentQuestionIndex ?? 0
+);
+const questionCount = computed(
+  () => quiz.value?.questions?.length ?? 0
+);
+const isFinished = computed(() => lobby.value?.status === 'finished');
 
 const players = computed(() => lobby.value?.players || []);
 const adminMarkers = computed(() =>
@@ -74,8 +98,56 @@ const adminMarkers = computed(() =>
 
 const initialCenter = [54, 15];
 
+const canPrevious = computed(() => currentQuestionIndex.value > 0);
+const canNext = computed(
+  () =>
+    lobby.value?.status !== 'finished' &&
+    (questionCount.value === 0 || currentQuestionIndex.value < questionCount.value)
+);
+
+const handlePrevious = async () => {
+  if (!lobby.value) return;
+  try {
+    await previousQuestion(lobby.value.id);
+  } catch (err) {
+    console.warn('Failed to go to previous question', err);
+  }
+};
+
+const handleNext = async () => {
+  if (!lobby.value) return;
+  try {
+    await nextQuestion(lobby.value.id);
+  } catch (err) {
+    console.warn('Failed to go to next question', err);
+  }
+};
+
+const goToResults = () => {
+  if (!lobby.value) return;
+  router.push({
+    path: '/result',
+    query: { lobby: lobby.value.id, quiz: lobby.value.quizId },
+  });
+};
+
+onMounted(() => {
+  if (lobbyId.value) {
+    fetchLobby(lobbyId.value).catch((err) => {
+      console.warn('Failed to load lobby', err);
+    });
+  }
+});
+
+watch(lobbyId, (id) => {
+  if (id) {
+    fetchLobby(id).catch((err) => {
+      console.warn('Failed to load lobby', err);
+    });
+  }
+});
+
 if (!lobby.value) {
-  // If no lobby found, you can redirect or show a message
   console.warn('Lobby not found');
 }
 </script>
@@ -152,6 +224,27 @@ if (!lobby.value) {
   gap: 2em;
   padding: 2em;
   align-items: stretch;
+}
+.host-banner {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(34, 197, 94, 0.12);
+  color: #0f172a;
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+}
+.host-banner-btn {
+  background: #22c55e;
+  border: none;
+  color: #0f172a;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 700;
 }
 .players {
   list-style: none;

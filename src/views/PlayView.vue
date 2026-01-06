@@ -20,13 +20,20 @@ const onSelectQuiz = (id) => {
   selectedQuizId.value = id;
 };
 
-const createLobby = () => {
+const createLobby = async () => {
   if (!selectedQuizId.value) return;
-  const { lobby, playerId } = createLobbyInStore(selectedQuizId.value, hostName.value || 'Host');
-  router.push({
-    path: '/lobby',
-    query: { lobby: lobby.id, player: playerId, quiz: selectedQuizId.value },
-  });
+  try {
+    const { lobby, playerId } = await createLobbyInStore(
+      selectedQuizId.value,
+      hostName.value || "Host"
+    );
+    router.push({
+      path: "/lobby",
+      query: { lobby: lobby.id, player: playerId, quiz: selectedQuizId.value },
+    });
+  } catch (err) {
+    console.warn("Failed to create lobby", err);
+  }
 };
 </script>
   

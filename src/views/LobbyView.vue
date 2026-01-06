@@ -54,9 +54,9 @@
 </template>
 
 <script setup>
-import { computed, watch } from 'vue';
+import { computed, watch, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { getLobby, startLobby } from '@/stores/lobbyStore';
+import { getLobby, startLobby, fetchLobby } from '@/stores/lobbyStore';
 
 const route = useRoute();
 const router = useRouter();
@@ -69,13 +69,21 @@ const isHost = computed(() => playerId.value === 1);
 
 const goToGame = () => {
   if (!lobby.value) return;
-  router.push({ path: isHost.value ? '/host' : '/game', query: route.query });
+  const nextQuery = {
+    ...route.query,
+    quiz: lobby.value?.quizId || route.query.quiz,
+  };
+  router.push({ path: isHost.value ? '/host' : '/game', query: nextQuery });
 };
 
-const startGame = () => {
+const startGame = async () => {
   if (!lobby.value) return;
-  startLobby(lobby.value.id);
-  goToGame();
+  try {
+    await startLobby(lobby.value.id);
+    goToGame();
+  } catch (err) {
+    console.warn('Failed to start lobby', err);
+  }
 };
 
 // Auto-route non-hosts when host starts
@@ -87,6 +95,22 @@ watch(
     }
   }
 );
+
+onMounted(() => {
+  if (lobbyId.value) {
+    fetchLobby(lobbyId.value).catch((err) => {
+      console.warn('Failed to load lobby', err);
+    });
+  }
+});
+
+watch(lobbyId, (id) => {
+  if (id) {
+    fetchLobby(id).catch((err) => {
+      console.warn('Failed to load lobby', err);
+    });
+  }
+});
 </script>
 
 <style scoped>
