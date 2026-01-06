@@ -43,6 +43,14 @@ let map;
 let markerLayer; // LayerGroup for markers
 let guessMarkerInstance;
 
+// Custom icon for markers
+const customIcon = L.icon({
+  iconUrl: '/MapPin.png',
+  iconSize: [30, 40],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+});
+
 const initMap = () => {
   map = L.map(mapContainer.value).setView(props.center, props.zoom);
 
@@ -68,7 +76,7 @@ const handleMapClick = (e) => {
   // Set or update the temporary guess marker when allowed
   if (props.allowGuessMarker) {
     if (!guessMarkerInstance) {
-      guessMarkerInstance = L.marker([lat, lng]).addTo(map);
+      guessMarkerInstance = L.marker([lat, lng], { icon: customIcon }).addTo(map);
     } else {
       guessMarkerInstance.setLatLng([lat, lng]);
     }
@@ -86,7 +94,7 @@ const renderMarkers = () => {
   // Regular markers from props
   if (props.markers && props.markers.length > 0) {
     props.markers.forEach((m) => {
-      const marker = L.marker([m.lat, m.lng]);
+      const marker = L.marker([m.lat, m.lng], { icon: customIcon });
       if (m.label) {
         marker.bindPopup(m.label);
       }
@@ -100,7 +108,7 @@ const renderMarkers = () => {
       guessMarkerInstance = L.marker([
         props.guessMarker.lat,
         props.guessMarker.lng,
-      ]).addTo(map);
+      ], { icon: customIcon }).addTo(map);
     } else {
       guessMarkerInstance.setLatLng([
         props.guessMarker.lat,

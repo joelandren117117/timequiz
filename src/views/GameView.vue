@@ -1,26 +1,27 @@
 <template>
-   <header class="app-header">
+  <div class="game-container">
+    <header class="app-header">
       <h1 class="logo-title">
         <span class="logo-short">TJ</span>
         <span class="logo-full">TOAJMGUÄSSÄR</span>
       </h1>
     </header>
 
-  <main class="layout">
-    <!-- Vänster panel: år -->
-    <aside class="sidebar">
-        <h2>Bild</h2>
-        <img :src="currentQuestion.imageUrl" :alt="currentQuestion.prompt" class="picture"/>
-    </aside>
+    <main class="layout">
+      <!-- Left panel: image -->
+      <aside class="card sidebar">
+        <h2 class="card-title">Bild</h2>
+        <img :src="currentQuestion.imageUrl" :alt="currentQuestion.prompt" class="picture" />
+      </aside>
 
-    <section class="map-section">
-        <h2>Player Guess Map</h2>
+      <section class="card map-section">
+        <h2 class="card-title">Player Guess Map</h2>
         <div class="game-status error" v-if="!lobby">
           Lobby not found.
         </div>
         <div class="game-status done" v-else-if="isFinished">
           Game finished. Thanks for playing!
-          <button class="results-btn" @click="goToResults">View Results</button>
+          <button class="btn btn-secondary results-btn" @click="goToResults">View Results</button>
         </div>
         <div class="game-status waiting" v-else-if="!isGameActive">
           Waiting for host to start the game...
@@ -30,15 +31,15 @@
           Question {{ questionNumber }} of {{ questionCount }}
         </p>
 
-        <div class="map-container ">
-        <LeafletMap
-          :center="mapCenter"
-          :zoom="4"
-          :clickable="isGameActive"
-          :allowGuessMarker="isGameActive"
-          :guessMarker="playerGuess"
-          @map-click="onPlayerMapClick"
-        />
+        <div class="map-container">
+          <LeafletMap
+            :center="mapCenter"
+            :zoom="4"
+            :clickable="isGameActive"
+            :allowGuessMarker="isGameActive"
+            :guessMarker="playerGuess"
+            @map-click="onPlayerMapClick"
+          />
         </div>
         
         <p class="map-info">
@@ -69,7 +70,7 @@
         </div>
   
         <button
-          class="submit-button"
+          class="btn btn-primary submit-button"
           :disabled="!playerGuess || !isGameActive || isFinished"
           @click="submitGuess"
         >
@@ -78,8 +79,8 @@
 
         <p v-if="feedback" class="feedback">{{ feedback }}</p>
       </section>
-</main>
-
+    </main>
+  </div>
 </template>
 
 <script>
@@ -234,126 +235,109 @@ export default {
 };
 </script>
 <style scoped>
+
+.game-container {
+  background-color: var(--bg);
+  min-height: 100vh;
+  padding: 3rem 2rem;
+  color: var(--text);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
 .app-header {
-  grid-area: header;
-  margin-bottom: 1rem;
+  text-align: center;
+  margin-bottom: 2rem;
 }
 
-.logo-title {
-  font-size: 5rem;
-  font-weight: 900;
-  color: var(--primary);
-  letter-spacing: -0.05em;
-  text-transform: uppercase;
-  margin: 0;
-}
-
-@media screen and (max-width:50em) {
-  .logo {
-    font-size: 5vw;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-}
-
-
-/* === Layouten runt kartan och deltagare === */
 .layout {
-    display: grid;
-    grid-template-columns: 50% 50%;
-    gap: 2em;
-    padding: 2em;
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1.25fr;
+  gap: 2rem;
+  align-items: start;
 }
 
-/* === Vänster sida: deltagare === */
-.sidebar {
-    background: lightblue;
-    padding: 2em;
-    border-radius: 1em;
+.card {
+  background-color: var(--surface);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 10px rgba(128, 200, 96, 0.28);
+  text-align: left;
+}
+
+.card-title {
+  margin: 0 0 1rem;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text);
 }
 
 .picture {
-    width: 100%;
-    border-radius: 1em;
-    display: block;
+  width: 100%;
+  border-radius: 12px;
+  display: block;
+  border: 1px solid rgba(41, 77, 25, 0.15);
 }
 
-/* === Höger sida: karta === */
-.map-section {
-    background: #18181b;
-    border-radius: 12px;
-    padding: 1rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  }
-  .game-status {
-    margin-bottom: 0.75rem;
-    padding: 0.6rem 0.9rem;
-    border-radius: 10px;
-    font-weight: 600;
-    font-size: 0.95rem;
-  }
-  .game-status.waiting {
-    background: rgba(234, 179, 8, 0.12);
-    color: #fde68a;
-    border: 1px solid rgba(234, 179, 8, 0.4);
-  }
-  .game-status.done {
-    background: rgba(34, 197, 94, 0.12);
-    color: #86efac;
-    border: 1px solid rgba(34, 197, 94, 0.4);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-  }
-  .game-status.error {
-    background: rgba(239, 68, 68, 0.12);
-    color: #fca5a5;
-    border: 1px solid rgba(239, 68, 68, 0.4);
-  }
-  .question-progress {
-    margin: 0 0 0.75rem;
-    color: #e5e7eb;
-    font-weight: 600;
-  }
-  .feedback {
-    margin-top: 0.75rem;
-    color: #a5f3fc;
-    font-weight: 600;
-  }
-  .results-btn {
-    background: #22c55e;
-    color: #0f172a;
-    border: none;
-    padding: 0.4rem 0.8rem;
-    border-radius: 999px;
-    font-weight: 700;
-    cursor: pointer;
-  }
-  .map-container{
-    height: 400px;
-    width: 100%;
-  }
-  .map-container :deep(.leaflet-container) {
+.game-status {
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  background: var(--primary-soft);
+  border: 1px solid rgba(41, 77, 25, 0.18);
+  color: var(--primary-dark-dark);
+}
+
+.game-status.waiting {
+  color: var(--primary-dark);
+}
+
+.game-status.done {
+  background: var(--primary-soft-strong);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.game-status.error {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.25);
+  color: #b91c1c;
+}
+
+.question-progress {
+  margin: 0 0 1rem;
+  font-weight: 600;
+}
+
+.map-container {
+  height: 420px;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(41, 77, 25, 0.18);
+}
+
+.map-container :deep(.leaflet-container) {
   height: 100%;
   width: 100%;
 }
 
-#map {
-    width: 100%;
-    height: 30em;
-    background: red;
-    border-radius: 1em;
+.map-info {
+  margin: 0.75rem 0 0;
+  font-size: 0.95rem;
 }
 
 .year-guess {
-  margin: 1rem 0 1.25rem;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  margin: 1.2rem 0 1rem;
+  background: var(--primary-soft);
+  border: 1px solid rgba(41, 77, 25, 0.18);
   border-radius: 12px;
-  padding: 0.75rem 1rem;
-  color: #e5e7eb;
+  padding: 0.9rem 1rem;
 }
 
 .year-guess__label {
@@ -366,7 +350,7 @@ export default {
 
 .year-guess__label strong {
   font-size: 1.2rem;
-  color: #fde68a;
+  color: var(--primary);
   font-variant-numeric: tabular-nums;
 }
 
@@ -376,7 +360,7 @@ export default {
   height: 10px;
   margin: 0.65rem 0 0.35rem;
   border-radius: 999px;
-  background: linear-gradient(90deg, #6366f1, #22d3ee);
+  background: var(--primary-soft-strong);
   outline: none;
 }
 
@@ -386,77 +370,74 @@ export default {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: #0f172a;
-  border: 3px solid #22d3ee;
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
+  background: var(--surface);
+  border: 3px solid var(--primary);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
   cursor: pointer;
   transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 
 .slider::-webkit-slider-thumb:hover {
-  transform: scale(1.08);
-  box-shadow: 0 8px 18px rgba(34, 211, 238, 0.35);
+  transform: scale(1.06);
+  box-shadow: 0 8px 18px rgba(128, 200, 96, 0.22);
 }
 
 .slider::-moz-range-thumb {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: #0f172a;
-  border: 3px solid #22d3ee;
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
+  background: var(--surface);
+  border: 3px solid var(--primary);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
   cursor: pointer;
   transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 
 .slider::-moz-range-thumb:hover {
-  transform: scale(1.08);
-  box-shadow: 0 8px 18px rgba(34, 211, 238, 0.35);
+  transform: scale(1.06);
+  box-shadow: 0 8px 18px rgba(128, 200, 96, 0.22);
 }
 
 .year-guess__scale {
   display: flex;
   justify-content: space-between;
-  font-size: 0.8rem;
-  color: #9ca3af;
+  font-size: 0.85rem;
+  color: rgba(29, 28, 27, 0.7);
 }
 
 .submit-button {
   width: 100%;
-  padding: 0.9rem 1rem;
-  border: none;
-  border-radius: 999px;
-  background: linear-gradient(120deg, #22d3ee, #6366f1 55%, #a855f7);
-  color: #0b1021;
-  font-weight: 800;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  cursor: pointer;
-  box-shadow: 0 12px 30px rgba(99, 102, 241, 0.35);
-  transition: transform 0.12s ease, box-shadow 0.15s ease, filter 0.15s ease;
+  display: block;
 }
 
-.submit-button:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 18px 38px rgba(168, 85, 247, 0.35);
-  filter: brightness(1.02);
+.results-btn {
+  padding: 0.45rem 0.9rem;
+}
+
+.feedback {
+  margin-top: 0.9rem;
+  color: var(--primary-dark);
+  font-weight: 700;
 }
 
 .submit-button:disabled {
+  opacity: 0.45;
   cursor: not-allowed;
-  opacity: 0.55;
   box-shadow: none;
 }
 
-/* Responsiv fix */
 @media (max-width: 60em) {
-    .layout {
-        grid-template-columns: 1fr;
-    }
+  .game-container {
+    padding: 2rem 1.25rem;
+  }
 
-    #map {
-        height: 30em;
-    }
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .map-container {
+    height: 380px;
+  }
 }
 
 </style>
