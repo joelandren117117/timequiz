@@ -130,9 +130,10 @@
 
 <script>
 import LeafletMap from "../components/LeafletMap.vue";
-import io from "socket.io-client";
+import { io } from "socket.io-client";
+import { SOCKET_SERVER_URL } from "@/services/socketConfig";
 
-const socket = io("http://localhost:3000");
+const socket = io(SOCKET_SERVER_URL);
 
 const UPLOAD_ENDPOINT = "/api/upload";
 const MAX_PHOTO_BYTES = 5 * 1024 * 1024; // 5MB

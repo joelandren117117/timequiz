@@ -1,117 +1,96 @@
-import { reactive } from 'vue';
-
-const storageKey = 'timequiz-lobbies';
+import { reactive } from "vue";
+import { emitWithAck, socket } from "@/services/socketService";
 
 const state = reactive({
   lobbies: {},
 });
 
-const loadState = () => {
-  if (typeof localStorage === 'undefined') return;
-  try {
-    const raw = localStorage.getItem(storageKey);
-    if (!raw) return;
-    const parsed = JSON.parse(raw);
-    if (parsed && parsed.lobbies && typeof parsed.lobbies === 'object') {
-      state.lobbies = parsed.lobbies;
-    }
-  } catch (err) {
-    console.warn('Failed to load lobby state', err);
-  }
+const upsertLobby = (lobby) => {
+  if (!lobby?.id) return;
+  state.lobbies[lobby.id] = lobby;
 };
 
-const persist = () => {
-  if (typeof localStorage === 'undefined') return;
-  try {
-    localStorage.setItem(storageKey, JSON.stringify({ lobbies: state.lobbies }));
-  } catch (err) {
-    console.warn('Failed to persist lobby state', err);
-  }
-};
-
-loadState();
-
-const generateLobbyId = () =>
-  Math.random().toString(36).slice(2, 7).toUpperCase();
-
-const createLobby = (quizId, hostName = 'Host') => {
-  const id = generateLobbyId();
-  const lobby = {
-    id,
-    quizId,
-    status: 'waiting', // waiting | started | finished
-    host: {
-      id: 1,
-      name: hostName || 'Host',
-    },
-    players: [], // players do NOT include host
-    nextId: 2, // player ids start at 2
-    guesses: [], // { playerId, lat, lng, year, name, ts }
-    createdAt: Date.now(),
-  };
-  state.lobbies[id] = lobby;
-  persist();
-  return { lobby, playerId: 1 };
-};
+socket.on("lobby:update", (lobby) => {
+  upsertLobby(lobby);
+});
 
 const getLobby = (lobbyId) => state.lobbies[lobbyId];
 
-const joinLobby = (lobbyId, name) => {
-  const lobby = state.lobbies[lobbyId];
-  if (!lobby) throw new Error('Lobby not found.');
-  if (lobby.players.length >= 5) throw new Error('Lobby is full (max 5 players).');
-
-  const nextId = lobby.nextId;
-  lobby.nextId += 1;
-  const player = {
-    id: nextId,
-    name: name || `Player ${nextId}`,
-    isHost: false,
-    ready: false,
-    points: 0,
-  };
-  lobby.players.push(player);
-  persist();
-  return { lobby, playerId: nextId };
+const createLobby = async (quizId, hostName = "Host") => {
+  const response = await emitWithAck("lobby:create", { quizId, hostName });
+  if (!response?.ok) {
+    throw new Error(response?.error || "Could not create lobby.");
+  }
+  upsertLobby(response.lobby);
+  return { lobby: response.lobby, playerId: response.playerId };
 };
 
-const startLobby = (lobbyId) => {
-  const lobby = state.lobbies[lobbyId];
-  if (!lobby) throw new Error('Lobby not found.');
-  lobby.status = 'started';
-  persist();
+const joinLobby = async (lobbyId, name) => {
+  const response = await emitWithAck("lobby:join", { id: lobbyId, name });
+  if (!response?.ok) {
+    throw new Error(response?.error || "Could not join lobby.");
+  }
+  upsertLobby(response.lobby);
+  return { lobby: response.lobby, playerId: response.playerId };
 };
 
-const submitGuess = (lobbyId, { playerId, lat, lng, year, name }) => {
-  const lobby = state.lobbies[lobbyId];
-  if (!lobby) throw new Error('Lobby not found.');
-  if (!playerId || lat === undefined || lng === undefined || year === undefined) {
-    throw new Error('Missing guess data.');
+const fetchLobby = async (lobbyId) => {
+  if (!lobbyId) return null;
+  const response = await emitWithAck("lobby:get", { lobbyId });
+  if (!response?.ok) {
+    throw new Error(response?.error || "Could not load lobby.");
   }
-  if (!Array.isArray(lobby.guesses)) {
-    lobby.guesses = [];
-  }
-  const playerName =
-    name ||
-    lobby.players.find((p) => p.id === playerId)?.name ||
-    (playerId === lobby.host?.id ? lobby.host?.name : `Player ${playerId}`);
+  upsertLobby(response.lobby);
+  return response.lobby;
+};
 
-  const existingIdx = lobby.guesses.findIndex((g) => g.playerId === playerId);
-  const payload = { playerId, lat, lng, year, name: playerName, ts: Date.now() };
-  if (existingIdx >= 0) {
-    lobby.guesses.splice(existingIdx, 1, payload);
-  } else {
-    lobby.guesses.push(payload);
+const startLobby = async (lobbyId) => {
+  const response = await emitWithAck("lobby:start", { lobbyId });
+  if (!response?.ok) {
+    throw new Error(response?.error || "Could not start lobby.");
   }
-  persist();
-  return payload;
+  upsertLobby(response.lobby);
+  return response.lobby;
+};
+
+const previousQuestion = async (lobbyId) => {
+  const response = await emitWithAck("lobby:previous", { lobbyId });
+  if (!response?.ok) {
+    throw new Error(response?.error || "Could not move to previous question.");
+  }
+  upsertLobby(response.lobby);
+  return response.lobby;
+};
+
+const nextQuestion = async (lobbyId) => {
+  const response = await emitWithAck("lobby:next", { lobbyId });
+  if (!response?.ok) {
+    throw new Error(response?.error || "Could not move to next question.");
+  }
+  upsertLobby(response.lobby);
+  return response.lobby;
+};
+
+const submitGuess = async (lobbyId, payload) => {
+  const response = await emitWithAck("lobby:submitGuess", {
+    lobbyId,
+    ...payload,
+  });
+  if (!response?.ok) {
+    throw new Error(response?.error || "Could not submit guess.");
+  }
+  upsertLobby(response.lobby);
+  return response.guess;
 };
 
 export {
   state as lobbyState,
-  createLobby,
   getLobby,
+  createLobby,
   joinLobby,
+  fetchLobby,
   startLobby,
+  previousQuestion,
+  nextQuestion,
   submitGuess,
 };

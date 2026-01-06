@@ -2,12 +2,16 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 
 const httpServer = createServer();
+const corsOrigin = process.env.CLIENT_ORIGIN
+  ? process.env.CLIENT_ORIGIN.split(",").map((origin) => origin.trim())
+  : true;
+
 const io = new Server(httpServer, {
-    cors: {
-      origin: "http://localhost:5173",
-      methods: ["GET"],
-      credentials: true
-  }
+  cors: {
+    origin: corsOrigin,
+    methods: ["GET"],
+    credentials: true,
+  },
 });
 
 // Read in the "class" to store all our data on the server side
@@ -24,7 +28,7 @@ io.on('connection', function (socket) {
   sockets(this, socket, data);
 });
 
-const HOST = process.env.HOST || "127.0.0.1";
+const HOST = process.env.HOST || "0.0.0.0";
 const PORT = Number(process.env.PORT) || 3000;
 
 let hasRetried = false;

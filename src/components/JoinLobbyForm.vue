@@ -10,7 +10,7 @@
     const errorMessage = ref('');
     const isJoining = ref(false);
     
-    const handleJoinLobby = () => {
+    const handleJoinLobby = async () => {
         if (!lobbyId.value || !playerName.value) {
             errorMessage.value = "Both Lobby ID and player name are required.";
             return;
@@ -22,10 +22,10 @@
         try {
             const id = lobbyId.value.trim().toUpperCase();
             const name = playerName.value.trim();
-            const { playerId } = joinLobby(id, name);
+            const { lobby, playerId } = await joinLobby(id, name);
             router.push({
                 path: '/lobby',
-                query: { lobby: id, player: playerId },
+                query: { lobby: id, player: playerId, quiz: lobby?.quizId },
             });
         } catch (err) {
             errorMessage.value = err.message || 'Could not join lobby.';
