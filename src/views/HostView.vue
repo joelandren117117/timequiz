@@ -278,6 +278,7 @@ if (!lobby.value) {
   grid-template-columns: 1fr;
   gap: 2rem;
   padding: 2rem;
+  border-radius: 0.75rem;
 }
 
 @media (min-width: 960px) {
@@ -297,6 +298,7 @@ if (!lobby.value) {
   flex-direction: column;
   min-height: 0;
   background: #0f172a;
+  border-radius: 0.75rem;
 }
 
 .map-wrapper {

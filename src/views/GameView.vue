@@ -10,7 +10,12 @@
     <!-- Vänster panel: år -->
     <aside class="sidebar">
         <h2>Bild</h2>
-        <img :src="currentQuestion.imageUrl" :alt="currentQuestion.prompt" class="picture"/>
+        <img
+          :src="currentQuestion.imageUrl"
+          alt="Image not found"
+          @error="errorImg"
+          class="picture"
+       />
     </aside>
 
     <section class="map-section">
@@ -229,7 +234,11 @@ export default {
     },
     toggleNav() {
       this.hideNav = !this.hideNav;
-    }
+    },
+    errorImg(event) {
+      event.target.onerror = null
+      event.target.src = '/img/Image-not-found.png'
+  }
   }
 };
 </script>
