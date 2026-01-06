@@ -196,23 +196,6 @@ export default {
       if (!this.isGameActive || this.isFinished) return;
       this.playerGuess = payload;
     },
-<<<<<<< HEAD
-    submitGuess() {
-      if (!this.playerGuess) return;
-      console.log('Submitting guess:', this.playerGuess, 'year', this.yearGuess);
-      alert(`Guess sent:
-Location: ${this.playerGuess.lat.toFixed(3)}, ${this.playerGuess.lng.toFixed(3)}
-Year: ${this.yearGuess}`);
-socket.emit('playerGuess', {
-        pollId,
-        playerId,
-        name: this.$route.query.name || null,
-        lat: this.playerGuess.lat,
-        lng: this.playerGuess.lng,
-        year: this.yearGuess
-      });
-    
-=======
     async submitGuess() {
       if (!this.playerGuess || !this.isGameActive || this.isFinished) return;
       try {
@@ -238,7 +221,6 @@ socket.emit('playerGuess', {
           quiz: this.quizId,
         },
       });
->>>>>>> ea3d2b26bb8beb822697febf4b3630ad9a38112e
     },
     switchLanguage() {
       this.lang = this.lang === 'en' ? 'sv' : 'en';
@@ -384,7 +366,7 @@ socket.emit('playerGuess', {
 
 .year-guess__label strong {
   font-size: 1.2rem;
-  color: white;
+  color: #fde68a;
   font-variant-numeric: tabular-nums;
 }
 
@@ -394,7 +376,7 @@ socket.emit('playerGuess', {
   height: 10px;
   margin: 0.65rem 0 0.35rem;
   border-radius: 999px;
-  background: red;
+  background: linear-gradient(90deg, #6366f1, #22d3ee);
   outline: none;
 }
 
@@ -405,7 +387,7 @@ socket.emit('playerGuess', {
   height: 22px;
   border-radius: 50%;
   background: #0f172a;
-  border: 3px solid white;
+  border: 3px solid #22d3ee;
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
   cursor: pointer;
   transition: transform 0.1s ease, box-shadow 0.1s ease;
@@ -421,7 +403,7 @@ socket.emit('playerGuess', {
   height: 22px;
   border-radius: 50%;
   background: #0f172a;
-  border: 3px solid white;
+  border: 3px solid #22d3ee;
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
   cursor: pointer;
   transition: transform 0.1s ease, box-shadow 0.1s ease;
@@ -444,7 +426,7 @@ socket.emit('playerGuess', {
   padding: 0.9rem 1rem;
   border: none;
   border-radius: 999px;
-  background: green;
+  background: linear-gradient(120deg, #22d3ee, #6366f1 55%, #a855f7);
   color: #0b1021;
   font-weight: 800;
   letter-spacing: 0.03em;
