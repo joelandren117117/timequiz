@@ -5,6 +5,8 @@ import {
   startLobby,
   advanceQuestion,
   submitGuess,
+  listQuizes,
+  addQuiz,
 } from "./lobbyStore.js";
 
 function sockets(io, socket, data) {
@@ -115,6 +117,34 @@ function sockets(io, socket, data) {
     } catch (err) {
       if (typeof ack === "function") {
         ack({ ok: false, error: err.message || "Failed to submit guess." });
+      }
+    }
+  });
+
+  socket.on("quiz:list", (_payload, ack) => {
+    try {
+      const quizes = listQuizes();
+      if (typeof ack === "function") {
+        ack({ ok: true, quizes });
+      }
+    } catch (err) {
+      if (typeof ack === "function") {
+        ack({ ok: false, error: err.message || "Failed to load quizzes." });
+      }
+    }
+  });
+
+  socket.on("quiz:create", (payload, ack) => {
+    try {
+      const quiz = addQuiz(payload);
+      const quizes = listQuizes();
+      io.emit("quiz:updated", quizes);
+      if (typeof ack === "function") {
+        ack({ ok: true, quiz, quizes });
+      }
+    } catch (err) {
+      if (typeof ack === "function") {
+        ack({ ok: false, error: err.message || "Failed to create quiz." });
       }
     }
   });

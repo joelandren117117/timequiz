@@ -85,9 +85,9 @@
 
 <script>
 import LeafletMap from '@/components/LeafletMap.vue';
-import quizesData from '../../server/data/quizes.json';
 import socket from '@/services/socketService';
 import { fetchLobby, getLobby, submitGuess } from '@/stores/lobbyStore';
+import { quizState, fetchQuizes } from '@/stores/quizStore';
 
 const fallbackQuestion = {
   imageUrl: '',
@@ -127,8 +127,8 @@ export default {
     },
     quiz() {
       return (
-        quizesData.quizes?.find((q) => q.id === this.quizId) ||
-        quizesData.quizes?.[0] ||
+        quizState.quizes?.find((q) => q.id === this.quizId) ||
+        quizState.quizes?.[0] ||
         { questions: [] }
       );
     },
@@ -162,6 +162,9 @@ export default {
   created() {
     socket.on("uiLabels", labels => this.uiLabels = labels);
     socket.emit("getUILabels", this.lang);
+    fetchQuizes().catch((err) => {
+      console.warn("Failed to load quizzes", err);
+    });
   },
   watch: {
     lobbyId: {

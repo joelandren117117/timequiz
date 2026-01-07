@@ -1,19 +1,19 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import JoinLobbyForm from '@/components/JoinLobbyForm.vue';
 import QuizList from '@/components/QuizList.vue';
-import quizesData from '../../server/data/quizes.json';
 import { createLobby as createLobbyInStore } from '@/stores/lobbyStore';
+import { quizState, fetchQuizes } from '@/stores/quizStore';
 
 const currentMode = ref('join');
 const selectedQuizId = ref('');
 const hostName = ref('');
-const quizes = quizesData.quizes ?? [];
+const quizes = computed(() => quizState.quizes ?? []);
 const router = useRouter();
 
 const selectedQuizName = computed(
-  () => quizes.find((q) => q.id === selectedQuizId.value)?.name || ''
+  () => quizes.value.find((q) => q.id === selectedQuizId.value)?.name || ''
 );
 
 const onSelectQuiz = (id) => {
@@ -35,6 +35,12 @@ const createLobby = async () => {
     console.warn("Failed to create lobby", err);
   }
 };
+
+onMounted(() => {
+  fetchQuizes().catch((err) => {
+    console.warn("Failed to load quizzes", err);
+  });
+});
 </script>
   
   <template>

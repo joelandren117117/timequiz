@@ -63,13 +63,13 @@
 import { computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import LeafletMap from '../components/LeafletMap.vue';
-import quizesData from '../../server/data/quizes.json';
 import {
   fetchLobby,
   getLobby,
   nextQuestion,
   previousQuestion,
 } from '@/stores/lobbyStore';
+import { quizState, fetchQuizes } from '@/stores/quizStore';
 
 const route = useRoute();
 const router = useRouter();
@@ -77,7 +77,7 @@ const lobbyId = computed(() => route.query.lobby);
 const lobby = computed(() => getLobby(lobbyId.value));
 const quizId = computed(() => lobby.value?.quizId || route.query.quiz);
 const quiz = computed(
-  () => quizesData.quizes?.find((q) => q.id === quizId.value) || null
+  () => quizState.quizes?.find((q) => q.id === quizId.value) || null
 );
 const currentQuestionIndex = computed(
   () => lobby.value?.currentQuestionIndex ?? 0
@@ -141,6 +141,9 @@ const goToResults = () => {
 };
 
 onMounted(() => {
+  fetchQuizes().catch((err) => {
+    console.warn('Failed to load quizzes', err);
+  });
   if (lobbyId.value) {
     fetchLobby(lobbyId.value).catch((err) => {
       console.warn('Failed to load lobby', err);

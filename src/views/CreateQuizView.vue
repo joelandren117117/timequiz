@@ -8,67 +8,91 @@
       </h1>
     </header>
     <section class="quiz-section">
-      <div class="quiz-name">Quiz Name</div>
+      <div class="quiz-name">
+        <input
+          class="quiz-name-input"
+          v-model.trim="quizName"
+          placeholder="Quiz name"
+          maxlength="64"
+        />
+      </div>
+
+      <div class="quiz-description">
+        <label class="quiz-description-label" for="quiz-description">Quiz description</label>
+        <input
+          id="quiz-description"
+          class="quiz-description-input"
+          v-model.trim="quizDescription"
+          placeholder="Optional description"
+          maxlength="120"
+        />
+      </div>
 
       <div class="question-list">
-        <div class="question-item">
-          <span>Question 1</span>
-          <button class="btn btn-secondary">Edit</button>
+        <div v-if="!questions.length" class="question-item empty">
+          <span>No questions yet. Save your first question below.</span>
         </div>
-        <div class="question-item">
-          <span>Question 2</span>
-          <button class="btn btn-secondary">Edit</button>
-        </div>
-        <div class="question-item">
-          <span>Question 3</span>
-          <button class="btn btn-secondary">Edit</button>
-        </div>
-        <div class="question-item">
-          <span>Question 4</span>
-          <button class="btn btn-secondary">Edit</button>
+        <div
+          v-for="(question, index) in questions"
+          :key="question.id"
+          class="question-item"
+        >
+          <span>Question {{ index + 1 }}: {{ question.prompt || `Question ${index + 1}` }}</span>
+          <button class="btn btn-secondary" type="button" @click="removeQuestion(index)">
+            Remove
+          </button>
         </div>
       </div>
 
-      <button class="btn btn-primary">+ Add Question</button>
-      <button class="btn btn-primary">Save Quiz</button>
+      <button class="btn btn-secondary" type="button" @click="resetQuestionEditor">
+        New Question
+      </button>
+      <button class="btn btn-primary" type="button" @click="saveQuiz">
+        Save Quiz
+      </button>
+
+      <div v-if="quizSaveError" class="upload-status upload-error">
+        {{ quizSaveError }}
+      </div>
+      <div v-if="quizSaveSuccess" class="upload-status">
+        {{ quizSaveSuccess }}
+      </div>
     </section>
 
     <section class="question-editor">
       <div class="photo">
-        <div class="map-placeholder" @click="openPhotoPicker">
-          <template v-if="photoPreviewUrl">
+        <div class="question-prompt">
+          <label class="prompt-label" for="question-prompt">Question prompt</label>
+          <input
+            id="question-prompt"
+            class="prompt-input"
+            v-model.trim="questionPrompt"
+            placeholder="Describe the moment in the photo"
+            maxlength="120"
+          />
+        </div>
+        <div class="map-placeholder">
+          <template v-if="imageUrl">
             <img
               class="photo-preview-img"
-              :src="photoPreviewUrl"
-              alt="Selected photo preview"
+              :src="imageUrl"
+              alt="Question image preview"
             />
           </template>
           <template v-else>
-            Photo Upload Placeholder
+            Image preview will appear here
           </template>
         </div>
-
-        <!-- Hidden native file input (most compatible) -->
-        <input
-          ref="photoInput"
-          class="file-input"
-          type="file"
-          accept="image/*"
-          @change="onPhotoSelected"
-          @click="openPhotoPicker"
-        />
-
+        
         <div class="photo-actions">
-          <button class="btn btn-secondary" type="button" :disabled="!photoFile" @click="clearPhoto">
-            Remove
-          </button>
-        </div>
-
-        <div v-if="uploadedPhotoUrl" class="upload-status">
-          Uploaded: <span class="upload-url">{{ uploadedPhotoUrl }}</span>
-        </div>
-        <div v-if="photoUploadError" class="upload-status upload-error">
-          {{ photoUploadError }}
+          <label class="prompt-label" for="image-url">Image URL</label>
+          <input
+            id="image-url"
+            class="prompt-input"
+            v-model.trim="imageUrl"
+            placeholder="https://example.com/photo.jpg"
+            maxlength="500"
+          />
         </div>
       </div>
       <div class="map-panel">
@@ -109,10 +133,9 @@
           <button
             class="btn btn-primary"
             id="saveQuestionBtn"
-            :disabled="isUploadingPhoto"
             @click="saveQuestion"
           >
-            {{ isUploadingPhoto ? 'Uploading…' : 'Save Question' }}
+            Save Question
           </button>
 
           <div v-if="questionSaveError" class="upload-status upload-error" style="margin-top: 0.75rem;">
@@ -130,13 +153,8 @@
 
 <script>
 import LeafletMap from "../components/LeafletMap.vue";
-import { io } from "socket.io-client";
-import { SOCKET_SERVER_URL } from "@/services/socketConfig";
-
-const socket = io(SOCKET_SERVER_URL);
-
-const UPLOAD_ENDPOINT = "/api/upload";
-const MAX_PHOTO_BYTES = 5 * 1024 * 1024; // 5MB
+import { socket } from "@/services/socketService";
+import { createQuiz as createQuizInStore } from "@/stores/quizStore";
 
 export default {
   name: "CreateQuizView",
@@ -150,20 +168,23 @@ export default {
       lang: localStorage.getItem("lang") || "en",
       hideNav: true,
 
+      quizName: "",
+      quizDescription: "",
+      questionPrompt: "",
+      questions: [],
+      imageUrl: "",
+
       yearGuess: 1960,
 
       initialCenter: [54, 15],
-
-      photoFile: null,
-      photoPreviewUrl: "",
-      uploadedPhotoUrl: "",
-      isUploadingPhoto: false,
-      photoUploadError: "",
 
       correctLocation: null,
 
       questionSaveError: "",
       questionSaveSuccess: "",
+
+      quizSaveError: "",
+      quizSaveSuccess: "",
     };
   },
   computed: {
@@ -180,9 +201,6 @@ export default {
   },
   beforeUnmount() {
     socket.off("uiLabels");
-    if (this.photoPreviewUrl) {
-      URL.revokeObjectURL(this.photoPreviewUrl);
-    }
   },
   methods: {
     switchLanguage() {
@@ -192,6 +210,16 @@ export default {
     },
     toggleNav() {
       this.hideNav = !this.hideNav;
+    },
+    resetQuestionEditor() {
+      this.questionPrompt = "";
+      this.imageUrl = "";
+      this.correctLocation = null;
+      this.yearGuess = 1960;
+      this.questionSaveError = "";
+    },
+    removeQuestion(index) {
+      this.questions.splice(index, 1);
     },
 
     onCorrectMapClick({ lat, lng } = {}) {
@@ -215,79 +243,6 @@ export default {
       this.correctLocation = { lat, lng };
     },
 
-    openPhotoPicker() {
-      this.$refs.photoInput?.click();
-    },
-
-    onPhotoSelected(e) {
-      const file = e.target.files?.[0];
-      if (!file) return;
-
-      if (!file.type?.startsWith("image/")) {
-        this.photoUploadError = "Please choose an image file.";
-        e.target.value = "";
-        return;
-      }
-      if (file.size > MAX_PHOTO_BYTES) {
-        this.photoUploadError = "Image is too large (max 5MB).";
-        e.target.value = "";
-        return;
-      }
-
-      if (this.photoPreviewUrl) {
-        URL.revokeObjectURL(this.photoPreviewUrl);
-      }
-
-      this.photoFile = file;
-      this.photoPreviewUrl = URL.createObjectURL(file);
-      this.uploadedPhotoUrl = "";
-      this.photoUploadError = "";
-    },
-
-    clearPhoto() {
-      if (this.photoPreviewUrl) {
-        URL.revokeObjectURL(this.photoPreviewUrl);
-      }
-      this.photoFile = null;
-      this.photoPreviewUrl = "";
-      this.uploadedPhotoUrl = "";
-      this.photoUploadError = "";
-
-      if (this.$refs.photoInput) {
-        this.$refs.photoInput.value = "";
-      }
-    },
-
-    async uploadPhoto() {
-      if (!this.photoFile || this.isUploadingPhoto) return;
-
-      this.isUploadingPhoto = true;
-      this.photoUploadError = "";
-      this.uploadedPhotoUrl = "";
-
-      try {
-        const formData = new FormData();
-        formData.append("image", this.photoFile);
-
-        const res = await fetch(UPLOAD_ENDPOINT, {
-          method: "POST",
-          body: formData,
-        });
-
-        if (!res.ok) {
-          const text = await res.text().catch(() => "");
-          throw new Error(text || `Upload failed (${res.status})`);
-        }
-
-        const data = await res.json().catch(() => ({}));
-        this.uploadedPhotoUrl = data.url || "(Uploaded, but backend did not return a url)";
-      } catch (err) {
-        this.photoUploadError = err?.message || "Upload failed.";
-      } finally {
-        this.isUploadingPhoto = false;
-      }
-    },
-
     async saveQuestion() {
       this.questionSaveError = "";
       this.questionSaveSuccess = "";
@@ -302,24 +257,47 @@ export default {
         return;
       }
 
-      if (this.photoFile) {
-        await this.uploadPhoto();
-
-        if (this.photoUploadError || !this.uploadedPhotoUrl) {
-          this.questionSaveError = this.photoUploadError || "Photo upload failed. Please try again.";
-          return;
-        }
-      }
+      const nextIndex = this.questions.length + 1;
       const questionPayload = {
+        id: `q${nextIndex}`,
+        prompt: this.questionPrompt || `Question ${nextIndex}`,
         year: this.yearGuess,
-        correctLocation: { ...this.correctLocation },
-        imageUrl: this.uploadedPhotoUrl || null,
+        location: { ...this.correctLocation },
+        imageUrl: this.imageUrl || null,
       };
 
-      console.log("Saving question:", questionPayload);
+      this.questions.push(questionPayload);
+      this.questionSaveSuccess = `Question ${nextIndex} saved!`;
+      this.resetQuestionEditor();
+    },
+    async saveQuiz() {
+      this.quizSaveError = "";
+      this.quizSaveSuccess = "";
 
-      this.questionSaveSuccess = "Question saved!";
-      alert("Question saved!");
+      if (!this.quizName.trim()) {
+        this.quizSaveError = "Quiz name is required.";
+        return;
+      }
+
+      if (!this.questions.length) {
+        this.quizSaveError = "Add at least one question before saving.";
+        return;
+      }
+
+      try {
+        await createQuizInStore({
+          name: this.quizName.trim(),
+          description: this.quizDescription.trim(),
+          questions: this.questions,
+        });
+        this.quizSaveSuccess = "Quiz saved to server/data/quizes.json!";
+        this.quizName = "";
+        this.quizDescription = "";
+        this.questions = [];
+        this.resetQuestionEditor();
+      } catch (err) {
+        this.quizSaveError = err?.message || "Failed to save quiz.";
+      }
     },
   },
 };
@@ -395,6 +373,35 @@ export default {
   border-radius: 10px;
 }
 
+.quiz-name-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 1.6rem;
+  font-weight: 800;
+  text-align: center;
+  outline: none;
+}
+
+.quiz-description {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.quiz-description-label {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.quiz-description-input {
+  padding: 0.7rem 0.9rem;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  font-size: 1rem;
+}
+
 /* Question Items */
 .question-list {
   display: flex;
@@ -418,6 +425,12 @@ export default {
   transition: background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
+.question-item.empty {
+  justify-content: center;
+  border-style: dashed;
+  opacity: 0.7;
+}
+
 .question-item:hover {
   background-color: var(--primary-soft);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -438,6 +451,23 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+}
+
+.question-prompt {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.prompt-label {
+  font-weight: 700;
+}
+
+.prompt-input {
+  padding: 0.7rem 0.9rem;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  font-size: 1rem;
 }
 
 .file-input {
