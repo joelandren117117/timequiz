@@ -85,7 +85,6 @@
 
 <script>
 import LeafletMap from '@/components/LeafletMap.vue';
-import socket from '@/services/socketService';
 import { fetchLobby, getLobby, submitGuess } from '@/stores/lobbyStore';
 import { quizState, fetchQuizes } from '@/stores/quizStore';
 
@@ -101,15 +100,12 @@ export default {
   components: { LeafletMap },
   data() {
     return {
-      uiLabels: {},
-      lang: localStorage.getItem("lang") || "en",
       yearGuess: 1900,
       feedback: null,
       minYear: 1900,
       maxYear: 2025,
       playerGuess: null,
-      hasSubmitted: false,
-      hideNav: true
+      hasSubmitted: false
     };
   },
   computed: {
@@ -160,8 +156,6 @@ export default {
     }
   },
   created() {
-    socket.on("uiLabels", labels => this.uiLabels = labels);
-    socket.emit("getUILabels", this.lang);
     fetchQuizes().catch((err) => {
       console.warn("Failed to load quizzes", err);
     });
@@ -226,14 +220,6 @@ export default {
         },
       });
     },
-    switchLanguage() {
-      this.lang = this.lang === 'en' ? 'sv' : 'en';
-      localStorage.setItem("lang", this.lang);
-      socket.emit("getUILabels", this.lang);
-    },
-    toggleNav() {
-      this.hideNav = !this.hideNav;
-    }
   }
 };
 </script>

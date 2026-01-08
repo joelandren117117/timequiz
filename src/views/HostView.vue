@@ -296,20 +296,6 @@ if (!lobby.value) {
 
 /* === Höger sida: karta === */
 
-
-.maps-preview {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 2rem;
-  padding: 2rem;
-}
-
-@media (min-width: 960px) {
-  .maps-preview {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
 .map-section {
   border-radius: 12px;
   padding: 1rem;

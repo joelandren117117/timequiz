@@ -153,7 +153,6 @@
 
 <script>
 import LeafletMap from "../components/LeafletMap.vue";
-import { socket } from "@/services/socketService";
 import { createQuiz as createQuizInStore } from "@/stores/quizStore";
 
 export default {
@@ -163,11 +162,6 @@ export default {
   },
   data() {
     return {
-      uiLabels: {},
-      newPollId: "",
-      lang: localStorage.getItem("lang") || "en",
-      hideNav: true,
-
       quizName: "",
       quizDescription: "",
       questionPrompt: "",
@@ -195,22 +189,7 @@ export default {
       return this.initialCenter;
     },
   },
-  created() {
-    socket.on("uiLabels", (labels) => (this.uiLabels = labels));
-    socket.emit("getUILabels", this.lang);
-  },
-  beforeUnmount() {
-    socket.off("uiLabels");
-  },
   methods: {
-    switchLanguage() {
-      this.lang = this.lang === "en" ? "sv" : "en";
-      localStorage.setItem("lang", this.lang);
-      socket.emit("getUILabels", this.lang);
-    },
-    toggleNav() {
-      this.hideNav = !this.hideNav;
-    },
     resetQuestionEditor() {
       this.questionPrompt = "";
       this.imageUrl = "";
