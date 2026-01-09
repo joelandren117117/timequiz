@@ -1,7 +1,9 @@
 <template>
   <div class="lobby-shell">
+  <div class="wrapper">
     <AppHeader />
     <div class="lobby-card" v-if="lobby">
+
       <header class="lobby-header">
         <div>
           <p class="eyebrow">{{ getLabel('lobbyIdLabel', 'Lobby ID') }}</p>
@@ -53,6 +55,7 @@
       <p>{{ getLabel('lobbyNotFound', 'Lobby not found.') }}</p>
       <router-link to="/play">{{ getLabel('lobbyBackToPlay', 'Back to Play') }}</router-link>
     </div>
+  </div>
   </div>
 </template>
 
@@ -131,6 +134,7 @@ watch(lobbyId, (id) => {
 .lobby-card {
   width: 100%;
   max-width: 640px;
+  min-width: 500px;
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
@@ -246,4 +250,17 @@ watch(lobbyId, (id) => {
   text-align: center;
   color: #374151;
 }
+
+.wrapper {
+  display: flex;
+  flex-direction: row;   
+  gap: 1rem;
+}
+
+@media (max-width: 900px) {
+  .wrapper {
+    flex-direction: column;
+  }
+}
+
 </style>
