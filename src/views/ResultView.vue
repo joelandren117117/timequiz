@@ -111,28 +111,14 @@ export default {
 
 <style scoped>
 .create-quiz-container {
-  background-color: var(--bg);
-  min-height: 100vh;
-  padding: 3rem 2rem;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: var(--text);
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-.app-header {
-    text-align: center;
+.create-quiz-container :deep(.app-header) {
     margin-bottom: 2rem;
     width: 100%;
-}
-.logo-title {
-    font-size: 5rem;
-    font-weight: 900;
-    color: var(--primary);
-    letter-spacing: -0.05em;
-    text-transform: uppercase;
-    margin: 0 auto;
 }
 
 /* results */

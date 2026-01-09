@@ -163,20 +163,6 @@ if (!lobby.value) {
 }
 </script>
 <style scoped>
-.app-header {
-  grid-area: header;
-  margin-bottom: 1rem;
-}
-
-.logo-title {
-  font-size: 5rem;
-  font-weight: 900;
-  color: var(--primary);
-  letter-spacing: -0.05em;
-  text-transform: uppercase;
-  margin: 0;
-}
-
 @media screen and (max-width:50em) {
   .logo {
     font-size: 5vw;
@@ -192,6 +178,10 @@ if (!lobby.value) {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+:deep(.app-header) {
+  margin-bottom: 1rem;
 }
 
 .host-box {
