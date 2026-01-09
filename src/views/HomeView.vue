@@ -33,6 +33,9 @@ import { getLabel } from '@/stores/uiStore';
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    margin-left: 10%;
+    margin-right: 10%;
+
 }    
 
 .home-container :deep(.app-header) {
@@ -46,6 +49,11 @@ import { getLabel } from '@/stores/uiStore';
     white-space: nowrap;
     align-self: center;
 }
+@media (max-width: 600px){
+    .tagline {
+        white-space: normal;
+    }
+}
 
 .action-buttons {
     display: flex;
@@ -53,6 +61,7 @@ import { getLabel } from '@/stores/uiStore';
     gap: 1.5rem;
     width: 100%;
     max-width: 400px;
+    
 }
 
 .button-link {
