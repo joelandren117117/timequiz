@@ -1,0 +1,34 @@
+{
+  "colors": [
+    {
+      "id": 1,
+      "name": "Red",
+      "hex": "#E53E3E",
+      "rgb": "rgb(229, 62, 62)"
+    },
+    {
+      "id": 2,
+      "name": "Blue",
+      "hex": "#3182CE",
+      "rgb": "rgb(49, 130, 206)"
+    },
+    {
+      "id": 3,
+      "name": "Green",
+      "hex": "#22863A",
+      "rgb": "rgb(34, 134, 58)"
+    },
+    {
+      "id": 4,
+      "name": "Purple",
+      "hex": "#805AD5",
+      "rgb": "rgb(128, 90, 213)"
+    },
+    {
+      "id": 5,
+      "name": "Orange",
+      "hex": "#ED8936",
+      "rgb": "rgb(237, 137, 54)"
+    }
+  ]
+}

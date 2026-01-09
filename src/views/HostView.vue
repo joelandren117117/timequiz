@@ -12,23 +12,33 @@
     <div class="left-column">
       <section class="host-box">
         <div class="host-grid" role="group" aria-label="Host controls">
-          <button class="host-btn btn btn-primary" :disabled="!canPrevious" @click="handlePrevious">
-            {{ getLabel('hostPrevious', 'Previous') }}
+          <button class="host-btn btn btn-secondary" :disabled="!canPrevious" @click="handlePrevious">
+            <span class="tri tri-left" aria-hidden="true"></span>
+            <span class="sr-only">{{ getLabel('hostPrevious', 'Previous') }}</span>
           </button>
-          <button class="host-btn btn btn-primary" :disabled="!canNext" @click="handleNext">
-            {{ getLabel('hostNext', 'Next') }}
-          </button>
+
           <button class="big-host-btn btn btn-primary" @click="goToResults">
             {{ getLabel('hostEndGame', 'End Game') }}
           </button>
+
+          <button class="host-btn btn btn-secondary" :disabled="!canNext" @click="handleNext">
+            <span class="tri tri-right" aria-hidden="true"></span>
+            <span class="sr-only">{{ getLabel('hostNext', 'Next') }}</span>
+          </button>
+
+
         </div>
       </section>
-
+    </div>
+    <div class="players-div">
       <section class="players-box">
         <h2>{{ getLabel('hostPlayersTitle', 'Players') }}</h2>
         <ul class="players">
           <li v-for="player in players" :key="player.id">
-            <span class="pname">{{ player.name }}</span>
+            <div class="player-info">
+              <span class="player-color-icon" :style="{ backgroundColor: player.color.hex }"></span>
+              <span class="pname">{{ player.name }}</span>
+            </div>
             <span class="pscore">{{ player.points }} {{ getLabel('pointsShort', 'pts') }}</span>
           </li>
         </ul>
@@ -38,7 +48,7 @@
     <!-- Right column: large map -->
     <section class="map-container">
       <div class="map-wrapper">
-        <LeafletMap :center="initialCenter" :zoom="3" :markers="adminMarkers" />
+        <LeafletMap :center="initialCenter" :zoom="3" :markers="adminMarkers" :correctLocation="correctLocation" />
       </div>
       <div class="map-info" v-if="adminMarkers.length">
         <ul class="map-info-list">
@@ -69,6 +79,7 @@ import {
   previousQuestion,
 } from '@/stores/lobbyStore';
 import { quizState, fetchQuizes } from '@/stores/quizStore';
+import playerColorsData from '../../server/data/playerColors.json';
 
 const route = useRoute();
 const router = useRouter();
@@ -86,23 +97,51 @@ const questionCount = computed(
 );
 const isFinished = computed(() => lobby.value?.status === 'finished');
 
+// Player color assignment function
+const getPlayerColor = (playerId, playerIndex) => {
+  const colors = playerColorsData.colors;
+  const colorIndex = playerIndex % colors.length;
+  return colors[colorIndex];
+};
+
 const players = computed(() => {
   if (!lobby.value) return [];
-  return (lobby.value.players || []).map(p => ({
+  return (lobby.value.players || []).map((p, index) => ({
     id: p.id,
     name: p.name,
     points: p.points || 0,
+    color: getPlayerColor(p.id, index),
   }))
-  .sort((a, b) => b.points - a.points);
+    .sort((a, b) => b.points - a.points)
+    .map((p, newIndex) => ({
+      ...p,
+      color: getPlayerColor(p.id, newIndex),
+    }));
 });
 const adminMarkers = computed(() =>
-  (lobby.value?.guesses || []).map((g) => ({
-    id: `g-${g.playerId}`,
-    lat: g.lat,
-    lng: g.lng,
-    label: `${g.name} (${g.year})`,
-  }))
+  (lobby.value?.guesses || []).map((g) => {
+    const player = players.value.find(p => p.id === g.playerId);
+    return {
+      id: `g-${g.playerId}`,
+      lat: g.lat,
+      lng: g.lng,
+      label: `${g.name} (${g.year})`,
+      playerColor: player?.color?.hex || '#999999',
+    };
+  })
 );
+
+const correctLocation = computed(() => {
+  const currentQuestion = quiz.value?.questions?.[currentQuestionIndex.value];
+  if (currentQuestion?.location) {
+    return {
+      lat: currentQuestion.location.lat,
+      lng: currentQuestion.location.lng,
+      label: currentQuestion.location.label,
+    };
+  }
+  return null;
+});
 
 const initialCenter = [54, 15];
 
@@ -184,13 +223,22 @@ if (!lobby.value) {
 }
 
 .layout {
+  padding: 0 10rem 2rem  10rem;
   display: grid;
-  grid-template-columns: 360px 1fr;
-  gap: 2rem;
-  align-items: start;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto auto auto;
+  grid-template-areas:
+    "header"
+    "buttons"
+    "map"
+
+    "players";
+  column-gap: 4rem;
+  align-items: flex-start;
 }
 
 .left-column {
+  grid-area: buttons;
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -209,9 +257,13 @@ if (!lobby.value) {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
+.host-box {
+  padding: 1rem 20% 1rem 20%;
+}
+
 .host-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: auto 3fr auto;
   gap: 0.75rem;
 }
 
@@ -228,18 +280,26 @@ if (!lobby.value) {
 }
 
 .players {
-  list-style: none;
+  display: flex;
+  justify-content: start;
   padding: 0;
-  margin: 0;
+  list-style:none;
+
+}
+
+.players-div {
+  grid-area: players;
+
 }
 
 .players li {
   display: flex;
+  width: 20%;
   justify-content: space-between;
   align-items: center;
   background: var(--surface);
   padding: 1rem 1.25rem;
-  margin-top: 0.75rem;
+  margin: 0 1% 0 1%;
   border-radius: 12px;
   border: 2px solid rgba(0, 0, 0, 0.08);
 }
@@ -248,11 +308,25 @@ if (!lobby.value) {
   font-weight: 800;
 }
 
+.player-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.player-color-icon {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
 .pscore {
   opacity: 0.85;
 }
 
 .map-container {
+  grid-area: map;
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -292,14 +366,51 @@ if (!lobby.value) {
   padding: 0.4rem 0.85rem;
 }
 
+.host-btn{
+  padding: 0;
+  height: 5.25rem;
+  aspect-ratio: 1 / 1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.tri{
+  width: 0;
+  height: 0;
+  border-top: 0.9rem solid transparent;
+  border-bottom: 0.9rem solid transparent;
+}
+
+.tri-left{
+  border-right: 1.3rem solid currentColor;
+  margin-right: 5%;
+}
+
+.tri-right{
+  border-left: 1.3rem solid currentColor;
+  margin-left: 5%;
+
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* Responsivt */
 @media (max-width: 60em) {
   .layout {
     grid-template-columns: 1fr;
   }
+
   .map-wrapper {
     height: 50vh;
   }
 }
 </style>
-
