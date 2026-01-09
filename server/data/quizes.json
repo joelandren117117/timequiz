@@ -5,42 +5,59 @@
       "name": "Landmarks Through Time",
       "description": "Five iconic places at the moment they became world news.",
       "questions": [
-  
         {
           "id": "q1",
           "prompt": "Statue of Liberty dedicated in New York Harbor.",
           "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/a/a1/Statue_of_Liberty_7.jpg",
-          "location": { "lat": 40.6892, "lng": -74.0445, "label": "New York, USA" },
+          "location": {
+            "lat": 40.6892,
+            "lng": -74.0445,
+            "label": "New York, USA"
+          },
           "year": 1886
         },
-
         {
           "id": "q2",
           "prompt": "https://commons.wikimedia.org/wiki/File:Image-not-found.png",
           "imageUrl": "https://commons.wikimedia.org/wiki/File:Tour_Eiffel_Wikimedia_Commons.jpg",
-          "location": { "lat": 48.8584, "lng": 2.2945, "label": "Paris, France" },
+          "location": {
+            "lat": 48.8584,
+            "lng": 2.2945,
+            "label": "Paris, France"
+          },
           "year": 1889
         },
-
         {
           "id": "q3",
           "prompt": "Sydney Opera House opened by Queen Elizabeth II.",
           "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/4/40/Sydney_Opera_House_Sails.jpg",
-          "location": { "lat": -33.8568, "lng": 151.2153, "label": "Sydney, Australia" },
+          "location": {
+            "lat": -33.8568,
+            "lng": 151.2153,
+            "label": "Sydney, Australia"
+          },
           "year": 1973
         },
         {
           "id": "q4",
           "prompt": "Berliners begin tearing down the Berlin Wall near Brandenburg Gate.",
           "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/4/4f/Berlin_Wall_Brandenburg_Gate_1989.jpg",
-          "location": { "lat": 52.5163, "lng": 13.3777, "label": "Berlin, Germany" },
+          "location": {
+            "lat": 52.5163,
+            "lng": 13.3777,
+            "label": "Berlin, Germany"
+          },
           "year": 1989
         },
         {
           "id": "q5",
           "prompt": "Burj Khalifa inaugurated as the tallest building in the world.",
           "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/9/93/Burj_Khalifa.jpg",
-          "location": { "lat": 25.1972, "lng": 55.2744, "label": "Dubai, UAE" },
+          "location": {
+            "lat": 25.1972,
+            "lng": 55.2744,
+            "label": "Dubai, UAE"
+          },
           "year": 2010
         }
       ]

@@ -14,18 +14,10 @@ const io = new Server(httpServer, {
   },
 });
 
-// Read in the "class" to store all our data on the server side
-// If you need to change how data is handled, check the Data.js file!
-
-import { Data } from "./Data.js";
-
-//
 import { sockets } from "./sockets.js";
 
-let data = new Data();
-
 io.on('connection', function (socket) {
-  sockets(this, socket, data);
+  sockets(this, socket);
 });
 
 const HOST = process.env.HOST || "0.0.0.0";

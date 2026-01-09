@@ -1,74 +1,102 @@
 <template>
   <div class="create-quiz-container">
     <!-- Logo style title -->
-    <header class="app-header">
-      <h1 class="logo-title">
-        <span class="logo-short">TJ</span>
-        <span class="logo-full">TOAJMGUÄSSÄR</span>
-      </h1>
-    </header>
+    <AppHeader />
     <section class="quiz-section">
-      <div class="quiz-name">Quiz Name</div>
+      <div class="quiz-name">
+        <input
+          class="quiz-name-input"
+          v-model.trim="quizName"
+          :placeholder="getLabel('createQuizNamePlaceholder', 'Quiz name')"
+          maxlength="64"
+        />
+      </div>
+
+      <div class="quiz-description">
+        <label class="quiz-description-label" for="quiz-description">
+          {{ getLabel('createQuizDescriptionLabel', 'Quiz description') }}
+        </label>
+        <input
+          id="quiz-description"
+          class="quiz-description-input"
+          v-model.trim="quizDescription"
+          :placeholder="getLabel('createQuizDescriptionPlaceholder', 'Optional description')"
+          maxlength="120"
+        />
+      </div>
 
       <div class="question-list">
-        <div class="question-item">
-          <span>Question 1</span>
-          <button class="btn btn-secondary">Edit</button>
+        <div v-if="!questions.length" class="question-item empty">
+          <span>{{ getLabel('createNoQuestions', 'No questions yet. Save your first question below.') }}</span>
         </div>
-        <div class="question-item">
-          <span>Question 2</span>
-          <button class="btn btn-secondary">Edit</button>
-        </div>
-        <div class="question-item">
-          <span>Question 3</span>
-          <button class="btn btn-secondary">Edit</button>
-        </div>
-        <div class="question-item">
-          <span>Question 4</span>
-          <button class="btn btn-secondary">Edit</button>
+        <div
+          v-for="(question, index) in questions"
+          :key="question.id"
+          class="question-item"
+        >
+          <span>
+            {{ getLabel('questionLabel', 'Question') }} {{ index + 1 }}:
+            {{ question.prompt || `${getLabel('questionLabel', 'Question')} ${index + 1}` }}
+          </span>
+          <button class="btn btn-secondary" type="button" @click="removeQuestion(index)">
+            {{ getLabel('createRemoveQuestion', 'Remove') }}
+          </button>
         </div>
       </div>
 
-      <button class="btn btn-primary">+ Add Question</button>
-      <button class="btn btn-primary">Save Quiz</button>
+      <button class="btn btn-secondary" type="button" @click="resetQuestionEditor">
+        {{ getLabel('createNewQuestion', 'New Question') }}
+      </button>
+      <button class="btn btn-primary" type="button" @click="saveQuiz">
+        {{ getLabel('createSaveQuiz', 'Save Quiz') }}
+      </button>
+
+      <div v-if="quizSaveErrorKey || quizSaveErrorText" class="upload-status upload-error">
+        {{ quizSaveErrorKey ? getLabel(quizSaveErrorKey, 'Failed to save quiz.') : quizSaveErrorText }}
+      </div>
+      <div v-if="quizSaveSuccessKey" class="upload-status">
+        {{ getLabel(quizSaveSuccessKey, 'Quiz saved!') }}
+      </div>
     </section>
 
     <section class="question-editor">
       <div class="photo">
-        <div class="map-placeholder" @click="openPhotoPicker">
-          <template v-if="photoPreviewUrl">
+        <div class="question-prompt">
+          <label class="prompt-label" for="question-prompt">
+            {{ getLabel('createQuestionPromptLabel', 'Question prompt') }}
+          </label>
+          <input
+            id="question-prompt"
+            class="prompt-input"
+            v-model.trim="questionPrompt"
+            :placeholder="getLabel('createQuestionPromptPlaceholder', 'Describe the moment in the photo')"
+            maxlength="120"
+          />
+        </div>
+        <div class="map-placeholder">
+          <template v-if="imageUrl">
             <img
               class="photo-preview-img"
-              :src="photoPreviewUrl"
-              alt="Selected photo preview"
+              :src="imageUrl"
+              alt="Question image preview"
             />
           </template>
           <template v-else>
-            Photo Upload Placeholder
+            {{ getLabel('createImagePreviewPlaceholder', 'Image preview will appear here') }}
           </template>
         </div>
-
-        <!-- Hidden native file input (most compatible) -->
-        <input
-          ref="photoInput"
-          class="file-input"
-          type="file"
-          accept="image/*"
-          @change="onPhotoSelected"
-          @click="openPhotoPicker"
-        />
-
+        
         <div class="photo-actions">
-          <button class="btn btn-secondary" type="button" :disabled="!photoFile" @click="clearPhoto">
-            Remove
-          </button>
-        </div>
-
-        <div v-if="uploadedPhotoUrl" class="upload-status">
-          Uploaded: <span class="upload-url">{{ uploadedPhotoUrl }}</span>
-        </div>
-        <div v-if="photoUploadError" class="upload-status upload-error">
-          {{ photoUploadError }}
+          <label class="prompt-label" for="image-url">
+            {{ getLabel('createImageUrlLabel', 'Image URL') }}
+          </label>
+          <input
+            id="image-url"
+            class="prompt-input"
+            v-model.trim="imageUrl"
+            :placeholder="getLabel('createImageUrlPlaceholder', 'https://example.com/photo.jpg')"
+            maxlength="500"
+          />
         </div>
       </div>
       <div class="map-panel">
@@ -85,15 +113,15 @@
         </div>
 
         <div class="upload-status" style="margin-top: 0.75rem;">
-          Correct location:
+          {{ getLabel('createCorrectLocation', 'Correct location:') }}
           <span v-if="correctLocation">
             {{ correctLocation.lat.toFixed(3) }}, {{ correctLocation.lng.toFixed(3) }}
           </span>
-          <span v-else>Click on the map to set the correct location.</span>
+          <span v-else>{{ getLabel('createCorrectLocationPrompt', 'Click on the map to set the correct location.') }}</span>
         </div>
 
         <div class="year-control">
-          <div class="year-label">Year</div>
+          <div class="year-label">{{ getLabel('createYearLabel', 'Year') }}</div>
 
           <div class="year-input-row">
             <input class="year-display" type="number" v-model.number="yearGuess" min="1900" max="2025" max-length="4" />
@@ -109,17 +137,16 @@
           <button
             class="btn btn-primary"
             id="saveQuestionBtn"
-            :disabled="isUploadingPhoto"
             @click="saveQuestion"
           >
-            {{ isUploadingPhoto ? 'Uploading…' : 'Save Question' }}
+            {{ getLabel('createSaveQuestion', 'Save Question') }}
           </button>
 
-          <div v-if="questionSaveError" class="upload-status upload-error" style="margin-top: 0.75rem;">
-            {{ questionSaveError }}
+          <div v-if="questionSaveErrorKey || questionSaveErrorText" class="upload-status upload-error" style="margin-top: 0.75rem;">
+            {{ questionSaveErrorKey ? getLabel(questionSaveErrorKey, 'Failed to save question.') : questionSaveErrorText }}
           </div>
-          <div v-if="questionSaveSuccess" class="upload-status" style="margin-top: 0.75rem;">
-            {{ questionSaveSuccess }}
+          <div v-if="questionSaveSuccessKey" class="upload-status" style="margin-top: 0.75rem;">
+            {{ getLabel(questionSaveSuccessKey, 'Question saved!') }}
           </div>
         </div>
       </div>
@@ -129,41 +156,38 @@
 </template>
 
 <script>
+import AppHeader from "../components/AppHeader.vue";
 import LeafletMap from "../components/LeafletMap.vue";
-import { io } from "socket.io-client";
-import { SOCKET_SERVER_URL } from "@/services/socketConfig";
-
-const socket = io(SOCKET_SERVER_URL);
-
-const UPLOAD_ENDPOINT = "/api/upload";
-const MAX_PHOTO_BYTES = 5 * 1024 * 1024; // 5MB
+import { createQuiz as createQuizInStore } from "@/stores/quizStore";
+import { getLabel } from "@/stores/uiStore";
 
 export default {
   name: "CreateQuizView",
   components: {
+    AppHeader,
     LeafletMap,
   },
   data() {
     return {
-      uiLabels: {},
-      newPollId: "",
-      lang: localStorage.getItem("lang") || "en",
-      hideNav: true,
+      quizName: "",
+      quizDescription: "",
+      questionPrompt: "",
+      questions: [],
+      imageUrl: "",
 
       yearGuess: 1960,
 
       initialCenter: [54, 15],
 
-      photoFile: null,
-      photoPreviewUrl: "",
-      uploadedPhotoUrl: "",
-      isUploadingPhoto: false,
-      photoUploadError: "",
-
       correctLocation: null,
 
-      questionSaveError: "",
-      questionSaveSuccess: "",
+      questionSaveErrorKey: "",
+      questionSaveErrorText: "",
+      questionSaveSuccessKey: "",
+
+      quizSaveErrorKey: "",
+      quizSaveErrorText: "",
+      quizSaveSuccessKey: "",
     };
   },
   computed: {
@@ -174,24 +198,18 @@ export default {
       return this.initialCenter;
     },
   },
-  created() {
-    socket.on("uiLabels", (labels) => (this.uiLabels = labels));
-    socket.emit("getUILabels", this.lang);
-  },
-  beforeUnmount() {
-    socket.off("uiLabels");
-    if (this.photoPreviewUrl) {
-      URL.revokeObjectURL(this.photoPreviewUrl);
-    }
-  },
   methods: {
-    switchLanguage() {
-      this.lang = this.lang === "en" ? "sv" : "en";
-      localStorage.setItem("lang", this.lang);
-      socket.emit("getUILabels", this.lang);
+    getLabel,
+    resetQuestionEditor() {
+      this.questionPrompt = "";
+      this.imageUrl = "";
+      this.correctLocation = null;
+      this.yearGuess = 1960;
+      this.questionSaveErrorKey = "";
+      this.questionSaveErrorText = "";
     },
-    toggleNav() {
-      this.hideNav = !this.hideNav;
+    removeQuestion(index) {
+      this.questions.splice(index, 1);
     },
 
     onCorrectMapClick({ lat, lng } = {}) {
@@ -215,111 +233,63 @@ export default {
       this.correctLocation = { lat, lng };
     },
 
-    openPhotoPicker() {
-      this.$refs.photoInput?.click();
-    },
-
-    onPhotoSelected(e) {
-      const file = e.target.files?.[0];
-      if (!file) return;
-
-      if (!file.type?.startsWith("image/")) {
-        this.photoUploadError = "Please choose an image file.";
-        e.target.value = "";
-        return;
-      }
-      if (file.size > MAX_PHOTO_BYTES) {
-        this.photoUploadError = "Image is too large (max 5MB).";
-        e.target.value = "";
-        return;
-      }
-
-      if (this.photoPreviewUrl) {
-        URL.revokeObjectURL(this.photoPreviewUrl);
-      }
-
-      this.photoFile = file;
-      this.photoPreviewUrl = URL.createObjectURL(file);
-      this.uploadedPhotoUrl = "";
-      this.photoUploadError = "";
-    },
-
-    clearPhoto() {
-      if (this.photoPreviewUrl) {
-        URL.revokeObjectURL(this.photoPreviewUrl);
-      }
-      this.photoFile = null;
-      this.photoPreviewUrl = "";
-      this.uploadedPhotoUrl = "";
-      this.photoUploadError = "";
-
-      if (this.$refs.photoInput) {
-        this.$refs.photoInput.value = "";
-      }
-    },
-
-    async uploadPhoto() {
-      if (!this.photoFile || this.isUploadingPhoto) return;
-
-      this.isUploadingPhoto = true;
-      this.photoUploadError = "";
-      this.uploadedPhotoUrl = "";
-
-      try {
-        const formData = new FormData();
-        formData.append("image", this.photoFile);
-
-        const res = await fetch(UPLOAD_ENDPOINT, {
-          method: "POST",
-          body: formData,
-        });
-
-        if (!res.ok) {
-          const text = await res.text().catch(() => "");
-          throw new Error(text || `Upload failed (${res.status})`);
-        }
-
-        const data = await res.json().catch(() => ({}));
-        this.uploadedPhotoUrl = data.url || "(Uploaded, but backend did not return a url)";
-      } catch (err) {
-        this.photoUploadError = err?.message || "Upload failed.";
-      } finally {
-        this.isUploadingPhoto = false;
-      }
-    },
-
     async saveQuestion() {
-      this.questionSaveError = "";
-      this.questionSaveSuccess = "";
+      this.questionSaveErrorKey = "";
+      this.questionSaveErrorText = "";
+      this.questionSaveSuccessKey = "";
 
       if (this.correctLocation?.lat == null || this.correctLocation?.lng == null) {
-        this.questionSaveError = "Pick a correct location on the map before saving.";
+        this.questionSaveErrorKey = "createPickLocation";
         return;
       }
 
       if (typeof this.yearGuess !== "number" || this.yearGuess < 1900 || this.yearGuess > 2025) {
-        this.questionSaveError = "Year must be between 1900 and 2025.";
+        this.questionSaveErrorKey = "createYearRangeError";
         return;
       }
 
-      if (this.photoFile) {
-        await this.uploadPhoto();
-
-        if (this.photoUploadError || !this.uploadedPhotoUrl) {
-          this.questionSaveError = this.photoUploadError || "Photo upload failed. Please try again.";
-          return;
-        }
-      }
+      const nextIndex = this.questions.length + 1;
       const questionPayload = {
+        id: `q${nextIndex}`,
+        prompt: this.questionPrompt || `Question ${nextIndex}`,
         year: this.yearGuess,
-        correctLocation: { ...this.correctLocation },
-        imageUrl: this.uploadedPhotoUrl || null,
+        location: { ...this.correctLocation },
+        imageUrl: this.imageUrl || null,
       };
 
-      console.log("Saving question:", questionPayload);
+      this.questions.push(questionPayload);
+      this.questionSaveSuccessKey = "createQuestionSaved";
+      this.resetQuestionEditor();
+    },
+    async saveQuiz() {
+      this.quizSaveErrorKey = "";
+      this.quizSaveErrorText = "";
+      this.quizSaveSuccessKey = "";
 
-      this.questionSaveSuccess = "Question saved!";
-      alert("Question saved!");
+      if (!this.quizName.trim()) {
+        this.quizSaveErrorKey = "createQuizNameRequired";
+        return;
+      }
+
+      if (!this.questions.length) {
+        this.quizSaveErrorKey = "createNeedQuestion";
+        return;
+      }
+
+      try {
+        await createQuizInStore({
+          name: this.quizName.trim(),
+          description: this.quizDescription.trim(),
+          questions: this.questions,
+        });
+        this.quizSaveSuccessKey = "createQuizSaved";
+        this.quizName = "";
+        this.quizDescription = "";
+        this.questions = [];
+        this.resetQuestionEditor();
+      } catch (err) {
+        this.quizSaveErrorText = err?.message || this.getLabel("createQuizSaveError", "Failed to save quiz.");
+      }
     },
   },
 };
@@ -395,6 +365,35 @@ export default {
   border-radius: 10px;
 }
 
+.quiz-name-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 1.6rem;
+  font-weight: 800;
+  text-align: center;
+  outline: none;
+}
+
+.quiz-description {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.quiz-description-label {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.quiz-description-input {
+  padding: 0.7rem 0.9rem;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  font-size: 1rem;
+}
+
 /* Question Items */
 .question-list {
   display: flex;
@@ -418,6 +417,12 @@ export default {
   transition: background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
+.question-item.empty {
+  justify-content: center;
+  border-style: dashed;
+  opacity: 0.7;
+}
+
 .question-item:hover {
   background-color: var(--primary-soft);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -438,6 +443,23 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+}
+
+.question-prompt {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.prompt-label {
+  font-weight: 700;
+}
+
+.prompt-input {
+  padding: 0.7rem 0.9rem;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  font-size: 1rem;
 }
 
 .file-input {

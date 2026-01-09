@@ -1,8 +1,24 @@
-import { readFileSync } from "fs";
+import { readFileSync, writeFileSync } from "fs";
 
 const quizesPath = new URL("./data/quizes.json", import.meta.url);
-const quizesData = JSON.parse(readFileSync(quizesPath, "utf-8"));
-const quizes = quizesData?.quizes ?? [];
+const loadQuizes = () => {
+  try {
+    const quizesData = JSON.parse(readFileSync(quizesPath, "utf-8"));
+    return Array.isArray(quizesData?.quizes) ? quizesData.quizes : [];
+  } catch {
+    return [];
+  }
+};
+
+let quizes = loadQuizes();
+
+const persistQuizes = (nextQuizes) => {
+  writeFileSync(
+    quizesPath,
+    JSON.stringify({ quizes: nextQuizes }, null, 2)
+  );
+  quizes = nextQuizes;
+};
 
 const state = {
   lobbies: {},
@@ -10,6 +26,85 @@ const state = {
 
 const getQuizById = (quizId) =>
   quizes.find((quiz) => quiz.id === quizId);
+
+const listQuizes = () => quizes;
+
+const slugify = (value) =>
+  String(value || "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+
+const generateQuizId = (name) => {
+  const base = slugify(name) || "quiz";
+  let candidate = base;
+  let counter = 1;
+  while (quizes.some((quiz) => quiz.id === candidate)) {
+    candidate = `${base}-${counter}`;
+    counter += 1;
+  }
+  return candidate;
+};
+
+const normalizeLocation = (location) => {
+  const lat = Number(location?.lat);
+  const lng = Number(location?.lng);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+    throw new Error("Each question needs a valid location.");
+  }
+  return {
+    lat,
+    lng,
+    label: typeof location?.label === "string" ? location.label : "",
+  };
+};
+
+const addQuiz = (payload = {}) => {
+  const name = String(payload?.name || "").trim();
+  if (!name) {
+    throw new Error("Quiz name is required.");
+  }
+
+  const questions = Array.isArray(payload?.questions) ? payload.questions : [];
+  if (questions.length === 0) {
+    throw new Error("Add at least one question before saving the quiz.");
+  }
+
+  const description = String(payload?.description || "").trim();
+  const quizId = payload?.id ? String(payload.id).trim() : generateQuizId(name);
+  if (quizes.some((quiz) => quiz.id === quizId)) {
+    throw new Error("Quiz id already exists.");
+  }
+
+  const normalizedQuestions = questions.map((question, index) => {
+    const prompt = String(question?.prompt || "").trim();
+    const year = Number(question?.year);
+    if (!Number.isFinite(year)) {
+      throw new Error("Each question needs a valid year.");
+    }
+    const location = normalizeLocation(
+      question?.location || question?.correctLocation
+    );
+    return {
+      id: question?.id ? String(question.id).trim() : `q${index + 1}`,
+      prompt: prompt || `Question ${index + 1}`,
+      imageUrl: question?.imageUrl || null,
+      location,
+      year,
+    };
+  });
+
+  const newQuiz = {
+    id: quizId,
+    name,
+    description,
+    questions: normalizedQuestions,
+  };
+
+  persistQuizes([...quizes, newQuiz]);
+  return newQuiz;
+};
 
 const toRadians = (value) => (value * Math.PI) / 180;
 
@@ -30,13 +125,16 @@ const calculatePoints = (question, guess) => {
   if (!question?.location || typeof question?.year !== "number") {
     return 0;
   }
+  const maxDistanceScore = 1000;
+  const maxYearScore = 1000;
+  const halfPointYear = 5;
   const distanceKm = haversineDistanceKm(question.location, guess);
   const distanceScore = Math.max(
     0,
-    Math.round(1000 / (1 + distanceKm / 200))
+    Math.round(maxDistanceScore / (1 + distanceKm / 200))
   );
   const yearDiff = Math.abs(question.year - Number(guess.year));
-  const yearScore = Math.max(0, 500 - yearDiff * 10);
+  const yearScore = Math.round(maxYearScore * Math.pow(0.5, yearDiff / halfPointYear));
   return distanceScore + yearScore;
 };
 
@@ -215,6 +313,8 @@ const submitGuess = (lobbyId, { playerId, lat, lng, year, name }) => {
 };
 
 export {
+  listQuizes,
+  addQuiz,
   createLobby,
   getLobby,
   joinLobby,

@@ -1,37 +1,35 @@
 <template>
-  <header class="app-header">
-    <h1 class="logo-title">
-      <span class="logo-short">TJ</span>
-      <span class="logo-full">TOAJMGUÄSSÄR</span>
-    </h1>
-  </header>
+  <AppHeader />
 
   <main class="layout" v-if="lobby">
     <div class="host-banner finished" v-if="isFinished">
-      <span>Game finished.</span>
-      <button class="host-banner-btn" @click="goToResults">View Results</button>
+      <span>{{ getLabel('hostGameFinished', 'Game finished.') }}</span>
+      <button class="host-banner-btn" @click="goToResults">
+        {{ getLabel('hostViewResults', 'View Results') }}
+      </button>
     </div>
     <!-- Left column: host controls + participants -->
     <div class="left-column">
       <section class="host-box">
         <div class="host-grid" role="group" aria-label="Host controls">
           <button class="host-btn" :disabled="!canPrevious" @click="handlePrevious">
-            Previous
+            {{ getLabel('hostPrevious', 'Previous') }}
           </button>
-          <button class="host-btn">Edit players</button>
-          <button class="host-btn">Back</button>
           <button class="host-btn" :disabled="!canNext" @click="handleNext">
-            Next
+            {{ getLabel('hostNext', 'Next') }}
+          </button>
+          <button class="big-host-btn" @click="goToResults">
+            {{ getLabel('hostEndGame', 'End Game') }}
           </button>
         </div>
       </section>
 
       <section class="players-box">
-        <h2>Players</h2>
+        <h2>{{ getLabel('hostPlayersTitle', 'Players') }}</h2>
         <ul class="players">
           <li v-for="player in players" :key="player.id">
             <span class="pname">{{ player.name }}</span>
-            <span class="pscore">Player</span>
+            <span class="pscore">{{ player.points }} {{ getLabel('pointsShort', 'pts') }}</span>
           </li>
         </ul>
       </section>
@@ -53,22 +51,24 @@
   </main>
 
   <div v-else class="lobby-missing">
-    <p>Lobby not found.</p>
-    <router-link to="/play">Back to Play</router-link>
+    <p>{{ getLabel('hostLobbyNotFound', 'Lobby not found.') }}</p>
+    <router-link to="/play">{{ getLabel('hostBackToPlay', 'Back to Play') }}</router-link>
   </div>
 </template>
 
 <script setup>
 import { computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import AppHeader from '@/components/AppHeader.vue';
 import LeafletMap from '../components/LeafletMap.vue';
-import quizesData from '../../server/data/quizes.json';
+import { getLabel } from '@/stores/uiStore';
 import {
   fetchLobby,
   getLobby,
   nextQuestion,
   previousQuestion,
 } from '@/stores/lobbyStore';
+import { quizState, fetchQuizes } from '@/stores/quizStore';
 
 const route = useRoute();
 const router = useRouter();
@@ -76,7 +76,7 @@ const lobbyId = computed(() => route.query.lobby);
 const lobby = computed(() => getLobby(lobbyId.value));
 const quizId = computed(() => lobby.value?.quizId || route.query.quiz);
 const quiz = computed(
-  () => quizesData.quizes?.find((q) => q.id === quizId.value) || null
+  () => quizState.quizes?.find((q) => q.id === quizId.value) || null
 );
 const currentQuestionIndex = computed(
   () => lobby.value?.currentQuestionIndex ?? 0
@@ -86,7 +86,15 @@ const questionCount = computed(
 );
 const isFinished = computed(() => lobby.value?.status === 'finished');
 
-const players = computed(() => lobby.value?.players || []);
+const players = computed(() => {
+  if (!lobby.value) return [];
+  return (lobby.value.players || []).map(p => ({
+    id: p.id,
+    name: p.name,
+    points: p.points || 0,
+  }))
+  .sort((a, b) => b.points - a.points);
+});
 const adminMarkers = computed(() =>
   (lobby.value?.guesses || []).map((g) => ({
     id: `g-${g.playerId}`,
@@ -132,6 +140,9 @@ const goToResults = () => {
 };
 
 onMounted(() => {
+  fetchQuizes().catch((err) => {
+    console.warn('Failed to load quizzes', err);
+  });
   if (lobbyId.value) {
     fetchLobby(lobbyId.value).catch((err) => {
       console.warn('Failed to load lobby', err);
@@ -209,6 +220,18 @@ if (!lobby.value) {
   cursor: pointer;
   font-weight: 600;
 }
+.big-host-btn {
+  grid-column: span 2;
+  height: 5.25rem;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  font-weight: 600;
+}
 
 .players-box {
   background: lightblue;
@@ -271,21 +294,6 @@ if (!lobby.value) {
 }
 
 /* === Höger sida: karta === */
-
-
-.maps-preview {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 2rem;
-  padding: 2rem;
-  border-radius: 0.75rem;
-}
-
-@media (min-width: 960px) {
-  .maps-preview {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
 
 .map-section {
   border-radius: 12px;

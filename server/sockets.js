@@ -1,3 +1,4 @@
+import { readFileSync } from "fs";
 import {
   createLobby,
   getLobby,
@@ -5,9 +6,22 @@ import {
   startLobby,
   advanceQuestion,
   submitGuess,
+  listQuizes,
+  addQuiz,
 } from "./lobbyStore.js";
 
-function sockets(io, socket, data) {
+const normalizeLang = (lang) =>
+  ["en", "sv"].includes(String(lang || "").trim().toLowerCase())
+    ? String(lang).trim().toLowerCase()
+    : "en";
+
+const getUILabels = (lang) => {
+  const safeLang = normalizeLang(lang);
+  const labelsPath = new URL(`./data/labels-${safeLang}.json`, import.meta.url);
+  return JSON.parse(readFileSync(labelsPath, "utf-8"));
+};
+
+function sockets(io, socket) {
   socket.on("lobby:create", (payload, ack) => {
     try {
       const { quizId, hostName } = payload || {};
@@ -118,44 +132,38 @@ function sockets(io, socket, data) {
       }
     }
   });
-  
-  socket.on('getUILabels', function(lang) {
-    socket.emit('uiLabels', data.getUILabels(lang));
+
+  socket.on("quiz:list", (_payload, ack) => {
+    try {
+      const quizes = listQuizes();
+      if (typeof ack === "function") {
+        ack({ ok: true, quizes });
+      }
+    } catch (err) {
+      if (typeof ack === "function") {
+        ack({ ok: false, error: err.message || "Failed to load quizzes." });
+      }
+    }
   });
 
-  socket.on('createPoll', function(d) {
-    data.createPoll(d.pollId, d.lang)
-    socket.emit('pollData', data.getPoll(d.pollId));
+  socket.on("quiz:create", (payload, ack) => {
+    try {
+      const quiz = addQuiz(payload);
+      const quizes = listQuizes();
+      io.emit("quiz:updated", quizes);
+      if (typeof ack === "function") {
+        ack({ ok: true, quiz, quizes });
+      }
+    } catch (err) {
+      if (typeof ack === "function") {
+        ack({ ok: false, error: err.message || "Failed to create quiz." });
+      }
+    }
   });
 
-  socket.on('addQuestion', function(d) {
-    data.addQuestion(d.pollId, {q: d.q, a: d.a});
-    socket.emit('questionUpdate', data.activateQuestion(d.pollId));
+  socket.on("getUILabels", (lang) => {
+    socket.emit("uiLabels", getUILabels(lang));
   });
-
-  socket.on('joinPoll', function(pollId) {
-    socket.join(pollId);
-    socket.emit('questionUpdate', data.activateQuestion(pollId))
-    socket.emit('submittedAnswersUpdate', data.getSubmittedAnswers(pollId));
-  });
-
-  socket.on('participateInPoll', function(d) {
-    data.participateInPoll(d.pollId, d.name);
-    io.to(d.pollId).emit('participantsUpdate', data.getParticipants(d.pollId));
-  });
-  socket.on('startPoll', function(pollId) {
-    io.to(pollId).emit('startPoll');
-  })
-  socket.on('runQuestion', function(d) {
-    let question = data.activateQuestion(d.pollId, d.questionNumber);
-    io.to(d.pollId).emit('questionUpdate', question);
-    io.to(d.pollId).emit('submittedAnswersUpdate', data.getSubmittedAnswers(d.pollId));
-  });
-
-  socket.on('submitAnswer', function(d) {
-    data.submitAnswer(d.pollId, d.answer);
-    io.to(d.pollId).emit('submittedAnswersUpdate', data.getSubmittedAnswers(d.pollId));
-  }); 
 }
 
 export { sockets };

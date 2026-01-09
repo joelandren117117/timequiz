@@ -1,19 +1,21 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import AppHeader from '@/components/AppHeader.vue';
 import JoinLobbyForm from '@/components/JoinLobbyForm.vue';
 import QuizList from '@/components/QuizList.vue';
-import quizesData from '../../server/data/quizes.json';
 import { createLobby as createLobbyInStore } from '@/stores/lobbyStore';
+import { quizState, fetchQuizes } from '@/stores/quizStore';
+import { getLabel } from '@/stores/uiStore';
 
 const currentMode = ref('join');
 const selectedQuizId = ref('');
 const hostName = ref('');
-const quizes = quizesData.quizes ?? [];
+const quizes = computed(() => quizState.quizes ?? []);
 const router = useRouter();
 
 const selectedQuizName = computed(
-  () => quizes.find((q) => q.id === selectedQuizId.value)?.name || ''
+  () => quizes.value.find((q) => q.id === selectedQuizId.value)?.name || ''
 );
 
 const onSelectQuiz = (id) => {
@@ -35,16 +37,20 @@ const createLobby = async () => {
     console.warn("Failed to create lobby", err);
   }
 };
+
+onMounted(() => {
+  fetchQuizes().catch((err) => {
+    console.warn("Failed to load quizzes", err);
+  });
+});
 </script>
   
   <template>
       <div class="create-quiz-container"> 
-          <header class="app-header">
-              <h1 class="logo-title">TIMEGUESSR</h1>
-          </header>
+          <AppHeader />
   
           <section class="selection-section">
-              <h2 class="section-title">Choose gamemode</h2>
+              <h2 class="section-title">{{ getLabel('playChooseMode', 'Choose gamemode') }}</h2>
   
               <div class="mode-selector">
                   <button 
@@ -52,7 +58,7 @@ const createLobby = async () => {
                       :class="{ 'active-mode': currentMode === 'join' }"
                       class="btn btn-secondary mode-btn"
                   >
-                      Join Lobby
+                      {{ getLabel('playJoinLobby', 'Join Lobby') }}
                   </button>
                   
                   <button 
@@ -60,24 +66,24 @@ const createLobby = async () => {
                       :class="{ 'active-mode': currentMode === 'host' }"
                       class="btn btn-secondary mode-btn"
                   >
-                      Host Lobby
+                      {{ getLabel('playHostLobby', 'Host Lobby') }}
                   </button>
               </div>
   
               <div class="content-wrapper">
                   <div v-if="currentMode === 'join'">
-                      <p class="description-text">Enter Lobby ID and username to connect:</p>
+                      <p class="description-text">{{ getLabel('playJoinDescription', 'Enter Lobby ID and username to connect:') }}</p>
                       <JoinLobbyForm />
                   </div>
   
                   <div v-else-if="currentMode === 'host'">
-                      <p class="description-text">Choose a quiz from the list below to create a new lobby:</p>
+                      <p class="description-text">{{ getLabel('playHostDescription', 'Choose a quiz from the list below to create a new lobby:') }}</p>
                       <div class="form-row">
-                        <label class="text-label" for="host-name">Host name</label>
+                        <label class="text-label" for="host-name">{{ getLabel('playHostName', 'Host name') }}</label>
                         <input
                           id="host-name"
                           v-model="hostName"
-                          placeholder="Enter your name"
+                          :placeholder="getLabel('joinPlayerName', 'Your name')"
                           maxlength="12"
                           class="text-input"
                         />
@@ -88,14 +94,15 @@ const createLobby = async () => {
                         @select="onSelectQuiz"
                       />
                       <p class="selected-quiz" v-if="selectedQuizName">
-                        Selected quiz: <strong>{{ selectedQuizName }}</strong>
+                        {{ getLabel('playSelectedQuiz', 'Selected quiz') }}:
+                        <strong>{{ selectedQuizName }}</strong>
                       </p>
                       <button
                         class="action-btn btn btn-primary"
                         :disabled="!selectedQuizId"
                         @click="createLobby"
                       >
-                        Create Lobby
+                        {{ getLabel('playCreateLobby', 'Create Lobby') }}
                       </button>
                   </div>
               </div>

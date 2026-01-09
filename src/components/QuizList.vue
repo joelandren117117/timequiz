@@ -1,6 +1,6 @@
 <template>
   <div class="quiz-list">
-    <h3>Available Quizzes</h3>
+    <h3>{{ getLabel('playAvailableQuizzes', 'Available Quizzes') }}</h3>
 
     <ul v-if="quizes.length" class="quiz-items">
       <li
@@ -14,7 +14,9 @@
             <div class="quiz-title">{{ quiz.name }}</div>
             <div class="quiz-meta">
               <span>{{ quiz.description }}</span>
-              <span class="count">{{ quiz.questions?.length || 0 }} questions</span>
+              <span class="count">
+                {{ quiz.questions?.length || 0 }} {{ getLabel('quizListQuestions', 'questions') }}
+              </span>
             </div>
           </div>
           <input
@@ -30,13 +32,14 @@
     </ul>
 
     <div v-else class="quiz-empty">
-      No quizzes found in server/data/quizes.json.
+      {{ getLabel('quizListEmpty', 'No quizzes found in server/data/quizes.json.') }}
     </div>
   </div>
 </template>
 
 <script setup>
 import { toRefs } from 'vue';
+import { getLabel } from '@/stores/uiStore';
 import quizesData from '../../server/data/quizes.json';
 
 const props = defineProps({
