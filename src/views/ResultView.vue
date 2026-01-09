@@ -111,36 +111,22 @@ export default {
 
 <style scoped>
 .create-quiz-container {
-  background-color: #FEFCEF;
-  min-height: 100vh;
-  padding: 3rem 2rem;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #1D1C1B;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-.app-header {
-    text-align: center;
+.create-quiz-container :deep(.app-header) {
     margin-bottom: 2rem;
     width: 100%;
-}
-.logo-title {
-    font-size: 5rem;
-    font-weight: 900;
-    color: #EA3E34;
-    letter-spacing: -0.05em;
-    text-transform: uppercase;
-    margin: 0 auto;
 }
 
 /* results */
 .results-wrapper {
-    background-color: #FFFFFF;
+    background-color: var(--surface);
     border-radius: 12px;
     padding: 2.5rem;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
     max-width: 600px;
     width: 100%;
     margin-top: 20px;
@@ -149,7 +135,7 @@ export default {
 .section-title {
     font-size: 2.5rem;
     text-align: center;
-    color: #EA3E34;
+    color: var(--primary);
     margin-bottom: 2.5rem;
     font-weight: 800;
 }
@@ -162,13 +148,13 @@ export default {
 }
 
 .player-rank-item {
-    background-color: #F8F8F8;
+    background-color: #f8f8f8;
     border-radius: 15px;
     padding: 15px 20px;
     display: flex;
     align-items: center;
     gap: 20px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
 }
 
 .player-info {
@@ -186,7 +172,7 @@ export default {
 .player-points {
     font-size: 1.1rem;
     font-weight: 700;
-    color: #1D1C1B;
+    color: var(--text);
 }
 
 /* Medal styling */
@@ -200,7 +186,7 @@ export default {
     font-weight: 800;
     font-size: 1.2rem;
     box-shadow: 0 3px 5px rgba(0,0,0,0.3);
-    color: #1D1C1B; 
+    color: var(--text);
 }
 
 /* Gold */
@@ -216,7 +202,7 @@ export default {
 /* Bronze  */
 .rank-3 {
     background: linear-gradient(145deg, #CD7F32, #B87333); 
-    color: #FEFCEF; 
+    color: #fff; 
 }
 
 /* Other Ranks */
@@ -240,29 +226,29 @@ export default {
   border: none;
   font-weight: 700;
   cursor: pointer;
-  transition: transform 0.1s ease, box-shadow 0.2s ease;
+  transition: transform 0.1s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .primary-action-btn {
-  background: #ea3e34;
-  color: #fefcef;
-  box-shadow: 0 8px 16px rgba(234, 62, 52, 0.25);
+  background: var(--primary);
+  color: var(--bg);
 }
 
 .primary-action-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 10px 20px rgba(234, 62, 52, 0.32);
+  background: var(--primary-dark);
+  box-shadow: 0 10px 20px rgba(128, 200, 96, 0.28);
 }
 
 .secondary-action-btn {
   background-color: transparent;
-  color: #EA3E34;
-  border: 2px solid #EA3E34;
+  color: var(--text);
+  border: 2px solid var(--primary);
   box-shadow: none;
 }
 
 .secondary-action-btn:hover{
-  background-color: rgba(234, 62, 52, 0.1);
+  background-color: var(--primary-soft-strong);
   transform: translateY(-1px);
 }
 </style>

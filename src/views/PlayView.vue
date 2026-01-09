@@ -113,18 +113,13 @@ onMounted(() => {
   <style scoped>
 
   .create-quiz-container {
-    background-color: var(--bg);
-    min-height: 100vh;
-    padding: 3rem 2rem;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: #1D1C1B;
   }
 
-  .app-header {
-      text-align: center;
+  .create-quiz-container :deep(.app-header) {
       margin-bottom: 2rem;
   }
-  
+
   .section-title {
       font-size: 2rem;
       text-align: center;

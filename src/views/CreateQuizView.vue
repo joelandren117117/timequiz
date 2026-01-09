@@ -298,12 +298,6 @@ export default {
 <style scoped>
 /* ========== Layout ========== */
 .create-quiz-container {
-  background-color: var(--bg);
-  min-height: 100vh;
-  padding: 3rem 2rem;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: var(--text);
-
   /* GRID LAYOUT */
   display: grid;
   grid-template-columns: 1fr;
@@ -313,6 +307,11 @@ export default {
     "quiz"
     "editor";
   row-gap: 2rem;
+}
+
+.create-quiz-container :deep(.app-header) {
+  grid-area: header;
+  margin-bottom: 1rem;
 }
 
 @media (min-width: 900px) {
@@ -327,10 +326,6 @@ export default {
   }
 }
 
-.app-header {
-  grid-area: header;
-  margin-bottom: 1rem;
-}
 .quiz-section {
   grid-area: quiz;
 

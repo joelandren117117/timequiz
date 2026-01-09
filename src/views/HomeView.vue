@@ -29,28 +29,14 @@ import { getLabel } from '@/stores/uiStore';
 <style scoped>
 
 .home-container {
-    background-color: var(--bg);
-    min-height: 100vh;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: var(--text);
-
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
 }    
 
-.app-header {
+.home-container :deep(.app-header) {
     margin-bottom: 2rem;
-}
-
-.logo-title {
-    font-size: 5rem;
-    font-weight: 900;
-    color: var(--primary);
-    letter-spacing: -0.05em;
-    text-transform: uppercase;
-    margin: 0;
 }
 
 .tagline {

@@ -233,15 +233,9 @@ export default {
 <style scoped>
 
 .game-container {
-  background-color: var(--bg);
-  min-height: 100vh;
-  padding: 3rem 2rem;
-  color: var(--text);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.app-header {
-  text-align: center;
+.game-container :deep(.app-header) {
   margin-bottom: 2rem;
 }
 

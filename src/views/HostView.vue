@@ -163,6 +163,17 @@ if (!lobby.value) {
 }
 </script>
 <style scoped>
+@media screen and (max-width:50em) {
+  .logo {
+    font-size: 5vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+
+/* Left column: stacked boxes */
 /* Sida */
 .host-container {
   background-color: var(--bg);
@@ -183,6 +194,10 @@ if (!lobby.value) {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+:deep(.app-header) {
+  margin-bottom: 1rem;
 }
 
 .host-box,
@@ -240,6 +255,9 @@ if (!lobby.value) {
 .map-container {
   display: flex;
   flex-direction: column;
+  min-height: 0;
+  background: #0f172a;
+  border-radius: 0.75rem;
   gap: 0.75rem;
 }
 
@@ -284,3 +302,4 @@ if (!lobby.value) {
   }
 }
 </style>
+
