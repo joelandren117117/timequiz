@@ -12,13 +12,13 @@
     <div class="left-column">
       <section class="host-box">
         <div class="host-grid" role="group" aria-label="Host controls">
-          <button class="host-btn" :disabled="!canPrevious" @click="handlePrevious">
+          <button class="host-btn btn btn-primary" :disabled="!canPrevious" @click="handlePrevious">
             {{ getLabel('hostPrevious', 'Previous') }}
           </button>
-          <button class="host-btn" :disabled="!canNext" @click="handleNext">
+          <button class="host-btn btn btn-primary" :disabled="!canNext" @click="handleNext">
             {{ getLabel('hostNext', 'Next') }}
           </button>
-          <button class="big-host-btn" @click="goToResults">
+          <button class="big-host-btn btn btn-primary" @click="goToResults">
             {{ getLabel('hostEndGame', 'End Game') }}
           </button>
         </div>
@@ -163,112 +163,55 @@ if (!lobby.value) {
 }
 </script>
 <style scoped>
-.app-header {
-  grid-area: header;
-  margin-bottom: 1rem;
+/* Sida */
+.host-container {
+  background-color: var(--bg);
+  min-height: 100vh;
+  padding: 3rem 2rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--text);
 }
 
-.logo-title {
-  font-size: 5rem;
-  font-weight: 900;
-  color: var(--primary);
-  letter-spacing: -0.05em;
-  text-transform: uppercase;
-  margin: 0;
+.layout {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 2rem;
+  align-items: start;
 }
 
-@media screen and (max-width:50em) {
-  .logo {
-    font-size: 5vw;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-}
-
-
-/* Left column: stacked boxes */
 .left-column {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.host-box {
-  background: #fff;
-  padding: 1rem;
-  border-radius: 0.75rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-  background: lightblue;
+.host-box,
+.players-box,
+.map-card {
+  background-color: var(--surface);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .host-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr 1fr;
   gap: 0.75rem;
+}
+
+.host-action {
+  height: 5.25rem;
   width: 100%;
-}
-
-.host-btn {
-  height: 5.25rem;
-  border-radius: 0.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: white;
-  border: 1px solid #ddd;
-  cursor: pointer;
-  font-weight: 600;
 }
-.big-host-btn {
+
+.host-end {
   grid-column: span 2;
-  height: 5.25rem;
-  border-radius: 0.75rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: white;
-  border: 1px solid #ddd;
-  cursor: pointer;
-  font-weight: 600;
 }
 
-.players-box {
-  background: lightblue;
-  padding: 1rem;
-  border-radius: 0.75rem;
-}
-
-
-/* === Layouten runt kartan och deltagare === */
-.layout {
-  display: grid;
-  grid-template-columns: 360px 1fr; /* left column (stacked boxes) + large map */
-  gap: 2em;
-  padding: 2em;
-  align-items: stretch;
-}
-.host-banner {
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: rgba(34, 197, 94, 0.12);
-  color: #0f172a;
-  border: 1px solid rgba(34, 197, 94, 0.4);
-  border-radius: 12px;
-  padding: 0.75rem 1rem;
-  font-weight: 700;
-}
-.host-banner-btn {
-  background: #22c55e;
-  border: none;
-  color: #0f172a;
-  padding: 0.4rem 0.85rem;
-  border-radius: 999px;
-  cursor: pointer;
-  font-weight: 700;
-}
 .players {
   list-style: none;
   padding: 0;
@@ -278,52 +221,66 @@ if (!lobby.value) {
 .players li {
   display: flex;
   justify-content: space-between;
-  background: white;
-  padding: 1em;
-  margin-bottom: 1em;
-  border-radius: 1em;
-  border: 0.1em solid lightgray;
+  align-items: center;
+  background: var(--surface);
+  padding: 1rem 1.25rem;
+  margin-top: 0.75rem;
+  border-radius: 12px;
+  border: 2px solid rgba(0, 0, 0, 0.08);
 }
 
 .pname {
-  font-weight: bold;
+  font-weight: 800;
 }
 
 .pscore {
-  color: black;
+  opacity: 0.85;
 }
 
-/* === Höger sida: karta === */
-
-.map-section {
-  border-radius: 12px;
-  padding: 1rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.map-container  {
+.map-container {
   display: flex;
   flex-direction: column;
-  min-height: 0;
-  background: #0f172a;
+  gap: 0.75rem;
 }
 
 .map-wrapper {
-  flex: 1 1 auto;
-  min-height: 0;
   height: 60vh;
+  border-radius: 12px;
+  border: 2px solid var(--primary);
+  overflow: hidden;
+  background: #F7FAF5;
 }
 
+.map-wrapper :deep(.leaflet-container),
 .map-wrapper :deep(.leaflet-map) {
   height: 100%;
+  width: 100%;
 }
 
+.host-banner {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 
-/* Responsiv fix */
+  background: var(--primary-soft-strong);
+  border: 2px solid var(--primary);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  font-weight: 800;
+}
+
+.host-banner-btn {
+  padding: 0.4rem 0.85rem;
+}
+
+/* Responsivt */
 @media (max-width: 60em) {
   .layout {
     grid-template-columns: 1fr;
   }
-
+  .map-wrapper {
+    height: 50vh;
+  }
 }
 </style>
