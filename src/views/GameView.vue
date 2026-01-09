@@ -99,12 +99,15 @@ const fallbackQuestion = {
   location: { lat: 54, lng: 15 },
 };
 
+const EUROPE_CENTER = [54, 15];
+const DEFAULT_YEAR_GUESS = 1950;
+
 export default {
   name: 'GameView',
   components: { AppHeader, LeafletMap },
   data() {
     return {
-      yearGuess: 1900,
+      yearGuess: DEFAULT_YEAR_GUESS,
       feedbackKey: null,
       feedbackText: null,
       minYear: 1900,
@@ -149,9 +152,7 @@ export default {
       return this.questionCount > 0 && this.currentQuestionIndex >= this.questionCount - 1;
     },
     mapCenter() {
-      return this.currentQuestion.location
-        ? [this.currentQuestion.location.lat, this.currentQuestion.location.lng]
-        : [54, 15];
+      return EUROPE_CENTER;
     },
     isGameActive() {
       return this.lobby?.status === 'started';
@@ -181,9 +182,7 @@ export default {
         this.hasSubmitted = false;
         this.feedbackKey = null;
         this.feedbackText = null;
-        if (this.currentQuestion?.year) {
-          this.yearGuess = this.currentQuestion.year;
-        }
+        this.yearGuess = DEFAULT_YEAR_GUESS;
       },
       immediate: true
     },

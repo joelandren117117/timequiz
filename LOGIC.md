@@ -237,7 +237,7 @@ File: `src/views/GameView.vue`
 - A year slider lets the player choose a year.
 - Clicking "Make My Guess" emits `lobby:submitGuess`.
 
-Note: The map center is set to the correct location for the question. This means the map is centered near the answer (but no marker is shown).
+Note: The player map is always centered on Europe by default, and the year slider resets to 1950 for each new question.
 
 ### 6.4 Host screen
 File: `src/views/HostView.vue`
