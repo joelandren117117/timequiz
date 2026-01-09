@@ -18,7 +18,7 @@
         },
         {
           "id": "q2",
-          "prompt": "Eiffel Tower inaugurated for the 1889 Exposition Universelle.",
+          "prompt": "https://commons.wikimedia.org/wiki/File:Image-not-found.png",
           "imageUrl": "https://commons.wikimedia.org/wiki/File:Tour_Eiffel_Wikimedia_Commons.jpg",
           "location": {
             "lat": 48.8584,
