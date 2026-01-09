@@ -1,19 +1,22 @@
 <template>
   <div class="lobby-shell">
+    <AppHeader />
     <div class="lobby-card" v-if="lobby">
       <header class="lobby-header">
         <div>
-          <p class="eyebrow">Lobby ID</p>
+          <p class="eyebrow">{{ getLabel('lobbyIdLabel', 'Lobby ID') }}</p>
           <h1 class="lobby-id">{{ lobby.id }}</h1>
         </div>
-        <span class="badge">{{ lobby.status === 'started' ? 'Started' : 'Waiting' }}</span>
+        <span class="badge">
+          {{ lobby.status === 'started' ? getLabel('lobbyStatusStarted', 'Started') : getLabel('lobbyStatusWaiting', 'Waiting') }}
+        </span>
       </header>
 
       <section class="players">
-        <h2>Players ({{ lobby.players.length }}/5)</h2>
+        <h2>{{ getLabel('lobbyPlayers', 'Players') }} ({{ lobby.players.length }}/5)</h2>
         <div class="host-row">
           <span class="name">{{ lobby.host.name }}</span>
-          <span class="role">Host</span>
+          <span class="role">{{ getLabel('lobbyHostRole', 'Host') }}</span>
         </div>
         <ul>
           <li
@@ -21,7 +24,7 @@
             :key="player.id"
           >
             <span class="name">{{ player.name }}</span>
-            <span class="role">Player</span>
+            <span class="role">{{ getLabel('lobbyPlayerRole', 'Player') }}</span>
           </li>
         </ul>
       </section>
@@ -33,7 +36,7 @@
           :disabled="lobby.players.length < 1 || lobby.status === 'started'"
           @click="startGame"
         >
-          Start Game
+          {{ getLabel('lobbyStartGame', 'Start Game') }}
         </button>
         <button
           v-else
@@ -41,14 +44,14 @@
           :disabled="lobby.status !== 'started'"
           @click="goToGame"
         >
-          Go to Game
+          {{ getLabel('lobbyGoToGame', 'Go to Game') }}
         </button>
       </footer>
     </div>
 
     <div v-else class="lobby-missing">
-      <p>Lobby not found.</p>
-      <router-link to="/play">Back to Play</router-link>
+      <p>{{ getLabel('lobbyNotFound', 'Lobby not found.') }}</p>
+      <router-link to="/play">{{ getLabel('lobbyBackToPlay', 'Back to Play') }}</router-link>
     </div>
   </div>
 </template>
@@ -56,7 +59,9 @@
 <script setup>
 import { computed, watch, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import AppHeader from '@/components/AppHeader.vue';
 import { getLobby, startLobby, fetchLobby } from '@/stores/lobbyStore';
+import { getLabel } from '@/stores/uiStore';
 
 const route = useRoute();
 const router = useRouter();

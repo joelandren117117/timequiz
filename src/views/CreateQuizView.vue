@@ -1,73 +1,75 @@
 <template>
   <div class="create-quiz-container">
     <!-- Logo style title -->
-    <header class="app-header">
-      <h1 class="logo-title">
-        <span class="logo-short">TJ</span>
-        <span class="logo-full">TOAJMGUÄSSÄR</span>
-      </h1>
-    </header>
+    <AppHeader />
     <section class="quiz-section">
       <div class="quiz-name">
         <input
           class="quiz-name-input"
           v-model.trim="quizName"
-          placeholder="Quiz name"
+          :placeholder="getLabel('createQuizNamePlaceholder', 'Quiz name')"
           maxlength="64"
         />
       </div>
 
       <div class="quiz-description">
-        <label class="quiz-description-label" for="quiz-description">Quiz description</label>
+        <label class="quiz-description-label" for="quiz-description">
+          {{ getLabel('createQuizDescriptionLabel', 'Quiz description') }}
+        </label>
         <input
           id="quiz-description"
           class="quiz-description-input"
           v-model.trim="quizDescription"
-          placeholder="Optional description"
+          :placeholder="getLabel('createQuizDescriptionPlaceholder', 'Optional description')"
           maxlength="120"
         />
       </div>
 
       <div class="question-list">
         <div v-if="!questions.length" class="question-item empty">
-          <span>No questions yet. Save your first question below.</span>
+          <span>{{ getLabel('createNoQuestions', 'No questions yet. Save your first question below.') }}</span>
         </div>
         <div
           v-for="(question, index) in questions"
           :key="question.id"
           class="question-item"
         >
-          <span>Question {{ index + 1 }}: {{ question.prompt || `Question ${index + 1}` }}</span>
+          <span>
+            {{ getLabel('questionLabel', 'Question') }} {{ index + 1 }}:
+            {{ question.prompt || `${getLabel('questionLabel', 'Question')} ${index + 1}` }}
+          </span>
           <button class="btn btn-secondary" type="button" @click="removeQuestion(index)">
-            Remove
+            {{ getLabel('createRemoveQuestion', 'Remove') }}
           </button>
         </div>
       </div>
 
       <button class="btn btn-secondary" type="button" @click="resetQuestionEditor">
-        New Question
+        {{ getLabel('createNewQuestion', 'New Question') }}
       </button>
       <button class="btn btn-primary" type="button" @click="saveQuiz">
-        Save Quiz
+        {{ getLabel('createSaveQuiz', 'Save Quiz') }}
       </button>
 
-      <div v-if="quizSaveError" class="upload-status upload-error">
-        {{ quizSaveError }}
+      <div v-if="quizSaveErrorKey || quizSaveErrorText" class="upload-status upload-error">
+        {{ quizSaveErrorKey ? getLabel(quizSaveErrorKey, 'Failed to save quiz.') : quizSaveErrorText }}
       </div>
-      <div v-if="quizSaveSuccess" class="upload-status">
-        {{ quizSaveSuccess }}
+      <div v-if="quizSaveSuccessKey" class="upload-status">
+        {{ getLabel(quizSaveSuccessKey, 'Quiz saved!') }}
       </div>
     </section>
 
     <section class="question-editor">
       <div class="photo">
         <div class="question-prompt">
-          <label class="prompt-label" for="question-prompt">Question prompt</label>
+          <label class="prompt-label" for="question-prompt">
+            {{ getLabel('createQuestionPromptLabel', 'Question prompt') }}
+          </label>
           <input
             id="question-prompt"
             class="prompt-input"
             v-model.trim="questionPrompt"
-            placeholder="Describe the moment in the photo"
+            :placeholder="getLabel('createQuestionPromptPlaceholder', 'Describe the moment in the photo')"
             maxlength="120"
           />
         </div>
@@ -80,17 +82,19 @@
             />
           </template>
           <template v-else>
-            Image preview will appear here
+            {{ getLabel('createImagePreviewPlaceholder', 'Image preview will appear here') }}
           </template>
         </div>
         
         <div class="photo-actions">
-          <label class="prompt-label" for="image-url">Image URL</label>
+          <label class="prompt-label" for="image-url">
+            {{ getLabel('createImageUrlLabel', 'Image URL') }}
+          </label>
           <input
             id="image-url"
             class="prompt-input"
             v-model.trim="imageUrl"
-            placeholder="https://example.com/photo.jpg"
+            :placeholder="getLabel('createImageUrlPlaceholder', 'https://example.com/photo.jpg')"
             maxlength="500"
           />
         </div>
@@ -109,15 +113,15 @@
         </div>
 
         <div class="upload-status" style="margin-top: 0.75rem;">
-          Correct location:
+          {{ getLabel('createCorrectLocation', 'Correct location:') }}
           <span v-if="correctLocation">
             {{ correctLocation.lat.toFixed(3) }}, {{ correctLocation.lng.toFixed(3) }}
           </span>
-          <span v-else>Click on the map to set the correct location.</span>
+          <span v-else>{{ getLabel('createCorrectLocationPrompt', 'Click on the map to set the correct location.') }}</span>
         </div>
 
         <div class="year-control">
-          <div class="year-label">Year</div>
+          <div class="year-label">{{ getLabel('createYearLabel', 'Year') }}</div>
 
           <div class="year-input-row">
             <input class="year-display" type="number" v-model.number="yearGuess" min="1900" max="2025" max-length="4" />
@@ -135,14 +139,14 @@
             id="saveQuestionBtn"
             @click="saveQuestion"
           >
-            Save Question
+            {{ getLabel('createSaveQuestion', 'Save Question') }}
           </button>
 
-          <div v-if="questionSaveError" class="upload-status upload-error" style="margin-top: 0.75rem;">
-            {{ questionSaveError }}
+          <div v-if="questionSaveErrorKey || questionSaveErrorText" class="upload-status upload-error" style="margin-top: 0.75rem;">
+            {{ questionSaveErrorKey ? getLabel(questionSaveErrorKey, 'Failed to save question.') : questionSaveErrorText }}
           </div>
-          <div v-if="questionSaveSuccess" class="upload-status" style="margin-top: 0.75rem;">
-            {{ questionSaveSuccess }}
+          <div v-if="questionSaveSuccessKey" class="upload-status" style="margin-top: 0.75rem;">
+            {{ getLabel(questionSaveSuccessKey, 'Question saved!') }}
           </div>
         </div>
       </div>
@@ -152,12 +156,15 @@
 </template>
 
 <script>
+import AppHeader from "../components/AppHeader.vue";
 import LeafletMap from "../components/LeafletMap.vue";
 import { createQuiz as createQuizInStore } from "@/stores/quizStore";
+import { getLabel } from "@/stores/uiStore";
 
 export default {
   name: "CreateQuizView",
   components: {
+    AppHeader,
     LeafletMap,
   },
   data() {
@@ -174,11 +181,13 @@ export default {
 
       correctLocation: null,
 
-      questionSaveError: "",
-      questionSaveSuccess: "",
+      questionSaveErrorKey: "",
+      questionSaveErrorText: "",
+      questionSaveSuccessKey: "",
 
-      quizSaveError: "",
-      quizSaveSuccess: "",
+      quizSaveErrorKey: "",
+      quizSaveErrorText: "",
+      quizSaveSuccessKey: "",
     };
   },
   computed: {
@@ -190,12 +199,14 @@ export default {
     },
   },
   methods: {
+    getLabel,
     resetQuestionEditor() {
       this.questionPrompt = "";
       this.imageUrl = "";
       this.correctLocation = null;
       this.yearGuess = 1960;
-      this.questionSaveError = "";
+      this.questionSaveErrorKey = "";
+      this.questionSaveErrorText = "";
     },
     removeQuestion(index) {
       this.questions.splice(index, 1);
@@ -223,16 +234,17 @@ export default {
     },
 
     async saveQuestion() {
-      this.questionSaveError = "";
-      this.questionSaveSuccess = "";
+      this.questionSaveErrorKey = "";
+      this.questionSaveErrorText = "";
+      this.questionSaveSuccessKey = "";
 
       if (this.correctLocation?.lat == null || this.correctLocation?.lng == null) {
-        this.questionSaveError = "Pick a correct location on the map before saving.";
+        this.questionSaveErrorKey = "createPickLocation";
         return;
       }
 
       if (typeof this.yearGuess !== "number" || this.yearGuess < 1900 || this.yearGuess > 2025) {
-        this.questionSaveError = "Year must be between 1900 and 2025.";
+        this.questionSaveErrorKey = "createYearRangeError";
         return;
       }
 
@@ -246,20 +258,21 @@ export default {
       };
 
       this.questions.push(questionPayload);
-      this.questionSaveSuccess = `Question ${nextIndex} saved!`;
+      this.questionSaveSuccessKey = "createQuestionSaved";
       this.resetQuestionEditor();
     },
     async saveQuiz() {
-      this.quizSaveError = "";
-      this.quizSaveSuccess = "";
+      this.quizSaveErrorKey = "";
+      this.quizSaveErrorText = "";
+      this.quizSaveSuccessKey = "";
 
       if (!this.quizName.trim()) {
-        this.quizSaveError = "Quiz name is required.";
+        this.quizSaveErrorKey = "createQuizNameRequired";
         return;
       }
 
       if (!this.questions.length) {
-        this.quizSaveError = "Add at least one question before saving.";
+        this.quizSaveErrorKey = "createNeedQuestion";
         return;
       }
 
@@ -269,13 +282,13 @@ export default {
           description: this.quizDescription.trim(),
           questions: this.questions,
         });
-        this.quizSaveSuccess = "Quiz saved to server/data/quizes.json!";
+        this.quizSaveSuccessKey = "createQuizSaved";
         this.quizName = "";
         this.quizDescription = "";
         this.questions = [];
         this.resetQuestionEditor();
       } catch (err) {
-        this.quizSaveError = err?.message || "Failed to save quiz.";
+        this.quizSaveErrorText = err?.message || this.getLabel("createQuizSaveError", "Failed to save quiz.");
       }
     },
   },

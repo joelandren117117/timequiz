@@ -1,38 +1,35 @@
 <template>
-  <header class="app-header">
-    <h1 class="logo-title">
-      <span class="logo-short">TJ</span>
-      <span class="logo-full">TOAJMGUÄSSÄR</span>
-    </h1>
-  </header>
+  <AppHeader />
 
   <main class="layout" v-if="lobby">
     <div class="host-banner finished" v-if="isFinished">
-      <span>Game finished.</span>
-      <button class="host-banner-btn" @click="goToResults">View Results</button>
+      <span>{{ getLabel('hostGameFinished', 'Game finished.') }}</span>
+      <button class="host-banner-btn" @click="goToResults">
+        {{ getLabel('hostViewResults', 'View Results') }}
+      </button>
     </div>
     <!-- Left column: host controls + participants -->
     <div class="left-column">
       <section class="host-box">
         <div class="host-grid" role="group" aria-label="Host controls">
           <button class="host-btn" :disabled="!canPrevious" @click="handlePrevious">
-            Previous
+            {{ getLabel('hostPrevious', 'Previous') }}
           </button>
           <button class="host-btn" :disabled="!canNext" @click="handleNext">
-            Next
+            {{ getLabel('hostNext', 'Next') }}
           </button>
           <button class="big-host-btn" @click="goToResults">
-            End Game
+            {{ getLabel('hostEndGame', 'End Game') }}
           </button>
         </div>
       </section>
 
       <section class="players-box">
-        <h2>Players</h2>
+        <h2>{{ getLabel('hostPlayersTitle', 'Players') }}</h2>
         <ul class="players">
           <li v-for="player in players" :key="player.id">
             <span class="pname">{{ player.name }}</span>
-            <span class="pscore">{{ player.points }} pts</span>
+            <span class="pscore">{{ player.points }} {{ getLabel('pointsShort', 'pts') }}</span>
           </li>
         </ul>
       </section>
@@ -54,15 +51,17 @@
   </main>
 
   <div v-else class="lobby-missing">
-    <p>Lobby not found.</p>
-    <router-link to="/play">Back to Play</router-link>
+    <p>{{ getLabel('hostLobbyNotFound', 'Lobby not found.') }}</p>
+    <router-link to="/play">{{ getLabel('hostBackToPlay', 'Back to Play') }}</router-link>
   </div>
 </template>
 
 <script setup>
 import { computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import AppHeader from '@/components/AppHeader.vue';
 import LeafletMap from '../components/LeafletMap.vue';
+import { getLabel } from '@/stores/uiStore';
 import {
   fetchLobby,
   getLobby,

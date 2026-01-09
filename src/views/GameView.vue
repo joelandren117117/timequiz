@@ -1,34 +1,34 @@
 <template>
   <div class="game-container">
-    <header class="app-header">
-      <h1 class="logo-title">
-        <span class="logo-short">TJ</span>
-        <span class="logo-full">TOAJMGUÄSSÄR</span>
-      </h1>
-    </header>
+    <AppHeader />
 
     <main class="layout">
       <!-- Left panel: image -->
       <aside class="card sidebar">
-        <h2 class="card-title">Bild</h2>
+        <h2 class="card-title">{{ getLabel('gameImageTitle', 'Image') }}</h2>
         <img :src="currentQuestion.imageUrl" :alt="currentQuestion.prompt" class="picture" />
       </aside>
 
       <section class="card map-section">
-        <h2 class="card-title">Player Guess Map</h2>
+        <h2 class="card-title">{{ getLabel('gameMapTitle', 'Player Guess Map') }}</h2>
         <div class="game-status error" v-if="!lobby">
-          Lobby not found.
+          {{ getLabel('gameLobbyNotFound', 'Lobby not found.') }}
         </div>
         <div class="game-status done" v-else-if="isFinished">
-          Game finished. Thanks for playing!
-          <button class="btn btn-secondary results-btn" @click="goToResults">View Results</button>
+          {{ getLabel('gameFinished', 'Game finished. Thanks for playing!') }}
+          <button class="btn btn-secondary results-btn" @click="goToResults">
+            {{ getLabel('gameViewResults', 'View Results') }}
+          </button>
         </div>
         <div class="game-status waiting" v-else-if="!isGameActive">
-          Waiting for host to start the game...
+          {{ getLabel('gameWaitingForHost', 'Waiting for host to start the game...') }}
         </div>
 
         <p class="question-progress" v-if="questionCount">
-          Question {{ questionNumber }} of {{ questionCount }}
+          {{ getLabel('gameQuestion', 'Question') }}
+          {{ questionNumber }}
+          {{ getLabel('gameOf', 'of') }}
+          {{ questionCount }}
         </p>
 
         <div class="map-container">
@@ -43,16 +43,16 @@
         </div>
         
         <p class="map-info">
-          Current guess:
+          {{ getLabel('gameCurrentGuess', 'Current guess') }}:
           <span v-if="playerGuess">
             {{ playerGuess.lat.toFixed(3) }}, {{ playerGuess.lng.toFixed(3) }}
           </span>
-          <span v-else>Click on the map to make a guess.</span>
+          <span v-else>{{ getLabel('gameClickToGuess', 'Click on the map to make a guess.') }}</span>
         </p>
 
         <div class="year-guess">
           <div class="year-guess__label">
-            <span>Year guess</span>
+            <span>{{ getLabel('gameYearGuess', 'Year guess') }}</span>
             <strong>{{ yearGuess }}</strong>
           </div>
           <input
@@ -74,19 +74,23 @@
           :disabled="!playerGuess || !isGameActive || isFinished"
           @click="submitGuess"
         >
-          Make My Guess
+          {{ getLabel('gameSubmitGuess', 'Make My Guess') }}
         </button>
 
-        <p v-if="feedback" class="feedback">{{ feedback }}</p>
+        <p v-if="feedbackKey || feedbackText" class="feedback">
+          {{ feedbackKey ? getLabel(feedbackKey, 'Guess submitted! Waiting for next question.') : feedbackText }}
+        </p>
       </section>
     </main>
   </div>
 </template>
 
 <script>
+import AppHeader from '@/components/AppHeader.vue';
 import LeafletMap from '@/components/LeafletMap.vue';
 import { fetchLobby, getLobby, submitGuess } from '@/stores/lobbyStore';
 import { quizState, fetchQuizes } from '@/stores/quizStore';
+import { getLabel } from '@/stores/uiStore';
 
 const fallbackQuestion = {
   imageUrl: '',
@@ -97,11 +101,12 @@ const fallbackQuestion = {
 
 export default {
   name: 'GameView',
-  components: { LeafletMap },
+  components: { AppHeader, LeafletMap },
   data() {
     return {
       yearGuess: 1900,
-      feedback: null,
+      feedbackKey: null,
+      feedbackText: null,
       minYear: 1900,
       maxYear: 2025,
       playerGuess: null,
@@ -174,7 +179,8 @@ export default {
       handler() {
         this.playerGuess = null;
         this.hasSubmitted = false;
-        this.feedback = null;
+        this.feedbackKey = null;
+        this.feedbackText = null;
         if (this.currentQuestion?.year) {
           this.yearGuess = this.currentQuestion.year;
         }
@@ -184,12 +190,14 @@ export default {
     isFinished: {
       handler(isFinished) {
         if (isFinished) {
-          this.feedback = null;
+          this.feedbackKey = null;
+          this.feedbackText = null;
         }
       }
     }
   },
   methods: {
+    getLabel,
     onPlayerMapClick(payload) {
       if (!this.isGameActive || this.isFinished) return;
       this.playerGuess = payload;
@@ -204,11 +212,11 @@ export default {
           year: this.yearGuess,
         });
         this.hasSubmitted = true;
-        this.feedback = this.isLastQuestion
-          ? null
-          : "Guess submitted! Waiting for next question.";
+        this.feedbackKey = this.isLastQuestion ? null : 'gameGuessSubmitted';
+        this.feedbackText = null;
       } catch (err) {
-        this.feedback = err.message || "Failed to submit guess.";
+        this.feedbackKey = null;
+        this.feedbackText = err.message || this.getLabel('gameGuessError', 'Failed to submit guess.');
       }
     },
     goToResults() {

@@ -1,11 +1,9 @@
 <template>
   <div class="create-quiz-container">
-    <header class="app-header">
-      <h1 class="logo-title">TIMEGUESSR</h1>
-    </header>
+    <AppHeader />
 
     <div class="results-wrapper" v-if="currentLobby">
-      <h2 class="section-title">Final Results</h2>
+      <h2 class="section-title">{{ getLabel('resultTitle', 'Final Results') }}</h2>
       
       <div class="player-list">
         <div class="player-rank-item" v-for="(player, idx) in players" :key="player.id">
@@ -16,7 +14,9 @@
           
           <div class="player-info">
             <span class="player-name">{{ player.namn }}</span>
-            <span class="player-points">{{ player.points }} Points</span>
+            <span class="player-points">
+              {{ player.points }} {{ getLabel('resultPoints', 'Points') }}
+            </span>
           </div>
 
         </div>
@@ -24,24 +24,24 @@
       
       <div class="button-row">
         <button class="action-btn secondary-action-btn" @click="goHome">
-          Go Home
+          {{ getLabel('resultGoHome', 'Go Home') }}
         </button>
         <button class="action-btn primary-action-btn" @click="showAnswers">
-          Show Answers
+          {{ getLabel('resultShowAnswers', 'Show Answers') }}
         </button>
         <button class="action-btn primary-action-btn" @click="playAgain">
-          Play Again
+          {{ getLabel('resultPlayAgain', 'Play Again') }}
         </button>
       </div>
       
     </div>
 
     <div class="results-wrapper" v-else>
-      <h2 class="section-title">Results Unavailable</h2>
-      <p>Lobby not found.</p>
+      <h2 class="section-title">{{ getLabel('resultUnavailableTitle', 'Results Unavailable') }}</h2>
+      <p>{{ getLabel('lobbyNotFound', 'Lobby not found.') }}</p>
       <div class="button-row">
         <button class="action-btn primary-action-btn" @click="goHome">
-          Go Home
+          {{ getLabel('resultGoHome', 'Go Home') }}
         </button>
       </div>
     </div>
@@ -49,12 +49,15 @@
 </template>
 
 <script>
+import AppHeader from '@/components/AppHeader.vue';
 import { getLobby, fetchLobby } from '@/stores/lobbyStore.js'; 
 import { computed } from 'vue';
+import { getLabel } from '@/stores/uiStore';
 
 
 export default {
   name: 'ResultView',
+  components: { AppHeader },
   data() {
     return {
       lobbyId: null,
@@ -81,6 +84,7 @@ export default {
     }
   },
   methods:{
+    getLabel,
     getRankClass(index) {
       if (index === 0) return 'rank-1'; // Gold
       if (index === 1) return 'rank-2'; // Silver

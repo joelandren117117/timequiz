@@ -100,8 +100,9 @@ Lobby structure (simplified):
 
 ### 3.3 UI labels (JSON files)
 Files: `server/data/labels-*.json`
-- JSON dictionaries intended for language selection.
-- Currently delivered by the `getUILabels` socket event.
+- Full UI dictionaries for TimeGuessr (home, play, lobby, game, host, create, results, shared labels).
+- Delivered by the `getUILabels` socket event.
+- The client-side `uiStore` requests these labels and exposes a `getLabel()` helper so all views swap language at runtime.
 
 ---
 
@@ -314,6 +315,13 @@ File: `src/stores/quizStore.js`
   - `quiz:list` (on demand)
   - `quiz:updated` (push updates)
 
+### 7.3 UI store (language)
+File: `src/stores/uiStore.js`
+- Keeps the active `lang`, the latest `labels`, and persists the choice in `localStorage`.
+- Requests labels via `getUILabels` and updates on socket reconnects.
+- `getLabel(key, fallback)` is used across views/components to swap text instantly.
+- The shared header (`src/components/AppHeader.vue`) shows the title and a flag-based EN/SV toggle.
+
 ---
 
 ## 8) Leaflet map usage
@@ -375,5 +383,7 @@ If you want local images:
 - Socket client: `src/services/socketService.js`
 - Lobby store (client): `src/stores/lobbyStore.js`
 - Quiz store (client): `src/stores/quizStore.js`
+- UI store (client): `src/stores/uiStore.js`
 - Leaflet map component: `src/components/LeafletMap.vue`
+- App header: `src/components/AppHeader.vue`
 - Views: `src/views/*View.vue`
