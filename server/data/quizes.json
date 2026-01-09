@@ -61,6 +61,68 @@
           "year": 2010
         }
       ]
+    },
+    {
+      "id": "elliots-sv-ra-quiz",
+      "name": "Elliots Svåra Quiz",
+      "description": "Lycka till",
+      "questions": [
+        {
+          "id": "q1",
+          "prompt": "Question 1",
+          "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Place_Bastille_20040914_A.jpg/960px-Place_Bastille_20040914_A.jpg",
+          "location": {
+            "lat": 48.85284911140326,
+            "lng": 2.3690549150847318,
+            "label": ""
+          },
+          "year": 2004
+        },
+        {
+          "id": "q2",
+          "prompt": "Question 2",
+          "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Kennedy_in_Berlin.jpg/1280px-Kennedy_in_Berlin.jpg",
+          "location": {
+            "lat": 52.50742458734355,
+            "lng": 13.39038641049855,
+            "label": ""
+          },
+          "year": 1963
+        },
+        {
+          "id": "q3",
+          "prompt": "Question 3",
+          "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Haitian_national_palace_earthquake.jpg/2560px-Haitian_national_palace_earthquake.jpg",
+          "location": {
+            "lat": 18.545396044865647,
+            "lng": -72.338319644436,
+            "label": ""
+          },
+          "year": 2010
+        },
+        {
+          "id": "q4",
+          "prompt": "Question 4",
+          "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Campo_Santo_von_der_Kuppel_der_Peterskirche.jpg/2560px-Campo_Santo_von_der_Kuppel_der_Peterskirche.jpg",
+          "location": {
+            "lat": 41.902120528657605,
+            "lng": 12.453386187231525,
+            "label": ""
+          },
+          "year": 2017
+        },
+        {
+          "id": "q5",
+          "prompt": "Question 5",
+          "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Prokudin-Gorskii-19.jpg/2560px-Prokudin-Gorskii-19.jpg",
+          "location": {
+            "lat": 39.8129320581878,
+            "lng": 64.44132386117212,
+            "label": ""
+          },
+          "year": 1911
+        }
+      ]
     }
   ]
 }
