@@ -132,9 +132,8 @@ watch(lobbyId, (id) => {
 }
 
 .lobby-card {
-  width: 100%;
-  max-width: 640px;
-  min-width: 500px;
+  width: 500px;
+  max-width: 80vw;
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
@@ -255,6 +254,7 @@ watch(lobbyId, (id) => {
   display: flex;
   flex-direction: row;   
   gap: 1rem;
+  display:flex;
 }
 
 @media (max-width: 900px) {

@@ -128,8 +128,9 @@ export default {
     padding: 2.5rem;
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
     max-width: 600px;
-    width: 100%;
-    margin-top: 20px;
+    width: 600px;
+    max-width: 70vw;
+    margin-top: 20px; 
 }
 
 .section-title {
