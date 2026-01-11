@@ -51,6 +51,7 @@ let polylineLayer; // LayerGroup for polylines
 let correctMarkerInstance; // Grey marker for correct location
 
 const initMap = () => {
+  if (!mapContainer.value) return;
   map = L.map(mapContainer.value).setView(props.center, props.zoom);
 
   // Add CARTO light basemap (OpenStreetMap data) before any overlays/markers
@@ -58,7 +59,13 @@ const initMap = () => {
     maxZoom: 19,
     subdomains: 'abcd',
     attribution: '© OpenStreetMap contributors © CARTO',
+    noWrap: true,
   }).addTo(map);
+
+  // Prevent horizontal wrapping/panning outside the world and make the bound "hard"
+  const worldBounds = [[-85, -180], [85, 180]];
+  map.setMaxBounds(worldBounds);
+  map.options.maxBoundsViscosity = 1;
 
   markerLayer = L.layerGroup().addTo(map);
   polylineLayer = L.layerGroup().addTo(map);
@@ -70,8 +77,15 @@ const initMap = () => {
   renderMarkers();
 };
 
+const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+
 const handleMapClick = (e) => {
-  const { lat, lng } = e.latlng;
+  if (!e || !e.latlng) return;
+  let { lat, lng } = e.latlng;
+
+  // Clamp coordinates so markers never land outside the visible world bounds
+  lat = clamp(lat, -85, 85);
+  lng = clamp(lng, -180, 180);
 
   // Set or update the temporary guess marker when allowed
   if (props.allowGuessMarker) {
