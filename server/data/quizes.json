@@ -180,6 +180,57 @@
           "year": 2007
         }
       ]
+    },
+    {
+      "id": "al-quiz",
+      "name": "Al quiz",
+      "description": "Alexanders fina quiz",
+      "questions": [
+        {
+          "id": "q1",
+          "prompt": "Question 1",
+          "imageUrl": "https://www.020mag.com/en/files/images/2017/05/img_909_Black-Hawk-Down.jpg",
+          "location": {
+            "lat": 2.0464013889580905,
+            "lng": 45.3183473174112,
+            "label": ""
+          },
+          "year": 1993
+        },
+        {
+          "id": "q2",
+          "prompt": "Question 2",
+          "imageUrl": "https://theaterlife.com/files/theaterlife/images-2/Clara.jpg",
+          "location": {
+            "lat": 23.141652381347303,
+            "lng": -82.35666364983477,
+            "label": ""
+          },
+          "year": 1959
+        },
+        {
+          "id": "q3",
+          "prompt": "Question 1",
+          "imageUrl": "https://i.ytimg.com/vi/kP8KWVsXK3k/sddefault.jpg",
+          "location": {
+            "lat": 40.71000752872113,
+            "lng": -73.85493556044987,
+            "label": ""
+          },
+          "year": 2002
+        },
+        {
+          "id": "q4",
+          "prompt": "Question 2",
+          "imageUrl": "https://games.kikizo.com/media/sonyconf2005_1/09.jpg",
+          "location": {
+            "lat": 34.040124877410385,
+            "lng": -118.27050073338214,
+            "label": ""
+          },
+          "year": 2005
+        }
+      ]
     }
   ]
 }
