@@ -125,14 +125,12 @@ const calculatePoints = (question, guess) => {
   if (!question?.location || typeof question?.year !== "number") {
     return 0;
   }
-  const maxDistanceScore = 1000;
-  const maxYearScore = 1000;
-  const halfPointYear = 5;
+  const maxDistanceScore = 5000;
+  const maxYearScore = 5000;
+  const halfPointYear = 10;
+  const halfPointKm = 500;
   const distanceKm = haversineDistanceKm(question.location, guess);
-  const distanceScore = Math.max(
-    0,
-    Math.round(maxDistanceScore / (1 + distanceKm / 200))
-  );
+  const distanceScore = Math.round(maxDistanceScore * Math.pow(0.5, distanceKm / halfPointKm));
   const yearDiff = Math.abs(question.year - Number(guess.year));
   const yearScore = Math.round(maxYearScore * Math.pow(0.5, yearDiff / halfPointYear));
   return distanceScore + yearScore;
