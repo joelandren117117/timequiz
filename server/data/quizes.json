@@ -7,7 +7,6 @@
       "questions": [
         {
           "id": "q1",
-          "prompt": "Statue of Liberty dedicated in New York Harbor.",
           "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/a/a1/Statue_of_Liberty_7.jpg",
           "location": {
             "lat": 40.6892,
@@ -18,7 +17,6 @@
         },
         {
           "id": "q2",
-          "prompt": "https://commons.wikimedia.org/wiki/File:Image-not-found.png",
           "imageUrl": "https://commons.wikimedia.org/wiki/File:Tour_Eiffel_Wikimedia_Commons.jpg",
           "location": {
             "lat": 48.8584,
@@ -29,7 +27,6 @@
         },
         {
           "id": "q3",
-          "prompt": "Sydney Opera House opened by Queen Elizabeth II.",
           "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/4/40/Sydney_Opera_House_Sails.jpg",
           "location": {
             "lat": -33.8568,
@@ -40,7 +37,6 @@
         },
         {
           "id": "q4",
-          "prompt": "Berliners begin tearing down the Berlin Wall near Brandenburg Gate.",
           "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/4/4f/Berlin_Wall_Brandenburg_Gate_1989.jpg",
           "location": {
             "lat": 52.5163,
@@ -51,7 +47,6 @@
         },
         {
           "id": "q5",
-          "prompt": "Burj Khalifa inaugurated as the tallest building in the world.",
           "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/9/93/Burj_Khalifa.jpg",
           "location": {
             "lat": 25.1972,
@@ -69,7 +64,6 @@
       "questions": [
         {
           "id": "q1",
-          "prompt": "Question 1",
           "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Place_Bastille_20040914_A.jpg/960px-Place_Bastille_20040914_A.jpg",
           "location": {
             "lat": 48.85284911140326,
@@ -80,7 +74,6 @@
         },
         {
           "id": "q2",
-          "prompt": "Question 2",
           "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Kennedy_in_Berlin.jpg/1280px-Kennedy_in_Berlin.jpg",
           "location": {
             "lat": 52.50742458734355,
@@ -91,7 +84,6 @@
         },
         {
           "id": "q3",
-          "prompt": "Question 3",
           "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Haitian_national_palace_earthquake.jpg/2560px-Haitian_national_palace_earthquake.jpg",
           "location": {
             "lat": 18.545396044865647,
@@ -102,7 +94,6 @@
         },
         {
           "id": "q4",
-          "prompt": "Question 4",
           "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Campo_Santo_von_der_Kuppel_der_Peterskirche.jpg/2560px-Campo_Santo_von_der_Kuppel_der_Peterskirche.jpg",
           "location": {
             "lat": 41.902120528657605,
@@ -113,7 +104,6 @@
         },
         {
           "id": "q5",
-          "prompt": "Question 5",
           "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Prokudin-Gorskii-19.jpg/2560px-Prokudin-Gorskii-19.jpg",
           "location": {
             "lat": 39.8129320581878,
