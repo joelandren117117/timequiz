@@ -50,13 +50,6 @@
       <div class="map-wrapper">
         <LeafletMap :center="initialCenter" :zoom="3" :markers="adminMarkers" :correctLocation="correctLocation" />
       </div>
-      <div class="map-info" v-if="adminMarkers.length">
-        <ul class="map-info-list">
-          <li v-for="m in adminMarkers" :key="m.id">
-            {{ m.label }} – {{ m.lat.toFixed(3) }}, {{ m.lng.toFixed(3) }}
-          </li>
-        </ul>
-      </div>
       <GuessTimeline
         v-if="currentQuestion"
         :guesses="timelineGuesses"
@@ -253,7 +246,7 @@ if (!lobby.value) {
     "header"
     "buttons"
     "map"
-
+    "timeline"
     "players";
   column-gap: 4rem;
   align-items: flex-start;
@@ -306,7 +299,7 @@ if (!lobby.value) {
   justify-content: start;
   padding: 0;
   list-style:none;
-
+  flex-wrap: wrap;
 }
 
 .players-div {
@@ -316,7 +309,8 @@ if (!lobby.value) {
 
 .players li {
   display: flex;
-  width: 20%;
+  width: 10vw;
+  min-width: 10rem;
   justify-content: space-between;
   align-items: center;
   background: var(--surface);
@@ -352,9 +346,6 @@ if (!lobby.value) {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  background: #0f172a;
-  border-radius: 0.75rem;
-  gap: 0.75rem;
 }
 
 .map-wrapper {
