@@ -1,6 +1,6 @@
 <template>
   <header class="app-header">
-    <h1 class="logo-title">{{ title }}</h1>
+    <h1 class="logo-title" @click="$router.push('/')">{{ title }}</h1>
     <div class="lang-switch" role="group" :aria-label="languageLabel">
       <button
         class="lang-btn"

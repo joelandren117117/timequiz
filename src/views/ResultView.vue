@@ -26,9 +26,6 @@
         <button class="action-btn secondary-action-btn" @click="goHome">
           {{ getLabel('resultGoHome', 'Go Home') }}
         </button>
-        <button class="action-btn primary-action-btn" @click="showAnswers">
-          {{ getLabel('resultShowAnswers', 'Show Answers') }}
-        </button>
         <button class="action-btn primary-action-btn" @click="playAgain">
           {{ getLabel('resultPlayAgain', 'Play Again') }}
         </button>
@@ -95,10 +92,6 @@ export default {
     goHome() {
       console.log('Sending back to homepage:');
       this.$router.push('/');
-    },
-
-    showAnswers() {
-      console.log(`Sending command: Show Answers for Lobby ${this.lobbyId}`);
     },
     
     playAgain() {
