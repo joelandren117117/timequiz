@@ -44,7 +44,7 @@
     <!-- Right column: large map -->
     <section class="map-container">
       <div class="map-wrapper">
-        <LeafletMap :center="initialCenter" :zoom="3" :markers="adminMarkers" :correctLocation="correctLocation" />
+        <LeafletMap :center="mapCenter" :zoom="3" :markers="adminMarkers" :correctLocation="correctLocation" />
       </div>
       <GuessTimeline
         v-if="currentQuestion"
@@ -155,6 +155,12 @@ const timelineGuesses = computed(() => {
 });
 
 const initialCenter = [54, 15];
+
+const mapCenter = computed(() => {
+  return correctLocation.value && correctLocation.value.lat != null && correctLocation.value.lng != null
+    ? [correctLocation.value.lat, correctLocation.value.lng]
+    : initialCenter;
+});
 
 const canPrevious = computed(() => currentQuestionIndex.value > 0);
 const canNext = computed(
