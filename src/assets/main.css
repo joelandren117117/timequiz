@@ -23,6 +23,10 @@ body {
   text-align: center;
 }
 
+.title{
+  font: SegoeUI;
+}
+
 /* Button Styles */
 .btn {
   font-weight: bold;
