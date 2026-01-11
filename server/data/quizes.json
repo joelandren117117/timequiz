@@ -58,64 +58,64 @@
       ]
     },
     {
-      "id": "elliots-enklare-quiz",
-      "name": "Elliots enklare quiz",
-      "description": "Den här ska nog gå att klara",
+      "id": "davids-historia",
+      "name": "Davids Historia",
+      "description": "",
       "questions": [
         {
           "id": "q1",
           "prompt": "Question 1",
-          "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Gaza_Harbor_-_panoramio.jpg/2560px-Gaza_Harbor_-_panoramio.jpg",
+          "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Challenger_explosion.jpg/960px-Challenger_explosion.jpg",
           "location": {
-            "lat": 31.425832407566567,
-            "lng": 34.337859167343446,
+            "lat": 28.55268104242162,
+            "lng": -80.39606166144068,
             "label": ""
           },
-          "year": 2007
+          "year": 1986
         },
         {
           "id": "q2",
           "prompt": "Question 2",
-          "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/6/63/Attack_near_Playa_Giron._April_19%2C_1961._-_panoramio.jpg",
+          "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Nagasakibomb.jpg/330px-Nagasakibomb.jpg",
           "location": {
-            "lat": 22.069525661998178,
-            "lng": -81.05275322019196,
+            "lat": 32.77345002636339,
+            "lng": 129.86341245864705,
             "label": ""
           },
-          "year": 1961
+          "year": 1945
         },
         {
           "id": "q3",
           "prompt": "Question 3",
-          "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/f/f3/Tahrir_Square_on_February11.png",
+          "imageUrl": "https://cdn.britannica.com/36/188636-050-5F9A5DFC/soldiers-French-front-line-Battle-of-Verdun-1916.jpg",
           "location": {
-            "lat": 30.04376875870224,
-            "lng": 31.234484783530906,
+            "lat": 49.15874018878503,
+            "lng": 5.386330002272462,
             "label": ""
           },
-          "year": 2011
+          "year": 1916
         },
         {
           "id": "q4",
           "prompt": "Question 4",
-          "imageUrl": "https://external-preview.redd.it/OZqNlL5gkGMAeSIPIRk480HVtV11212sq8YImKEHCYU.png?width=640&crop=smart&auto=webp&s=bc50b2e0c595d7077b3cc902c3eb8354654dfff9",
+          "imageUrl": "https://www.bilsport.se/api/images/d04625-d013435700575815739-d82375-d8483685220729367/1980x1320/05e22be1-c786-59a7-b52e-59bff32be4be.jpg",
           "location": {
-            "lat": 34.101407389129626,
-            "lng": -118.3412212944298,
+            "lat": 57.26136179150863,
+            "lng": 13.59879074466922,
             "label": ""
           },
-          "year": 1977
+          "year": 1973
         },
         {
           "id": "q5",
           "prompt": "Question 5",
-          "imageUrl": "https://c.ndtvimg.com/2024-04/fc82tef8_oj-simpson-police-car-chase_625x300_11_April_24.jpeg",
+          "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Crisis_20_diciembre_2001.jpg/500px-Crisis_20_diciembre_2001.jpg",
           "location": {
-            "lat": 33.85336720611553,
-            "lng": -117.92801779389085,
+            "lat": -34.60843527743227,
+            "lng": -58.372157131203366,
             "label": ""
           },
-          "year": 2007
+          "year": 2001
         }
       ]
     }
