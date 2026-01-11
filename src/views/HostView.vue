@@ -12,15 +12,15 @@
     <div class="left-column">
       <section class="host-box">
         <div class="host-grid" role="group" aria-label="Host controls">
-          <button class="host-btn btn btn-primary" :disabled="!canNext" @click="handleNext">
-            {{ getLabel('hostNext', 'Next') }}
+          <button class="host-btn btn btn-primary" :disabled="!canPrevious" @click="handlePrevious">
+            {{ getLabel('hostPrevious', 'Previous') }}
           </button>
           <button class="host-btn btn btn-primary" @click="goToResults">
             {{ getLabel('hostEndGame', 'End Game') }}
           </button>
-        <button class="host-btn btn btn-primary" :disabled="!canPrevious" @click="handlePrevious">
-            {{ getLabel('hostPrevious', 'Previous') }}
-        </button>
+        <button class="host-btn btn btn-primary" :disabled="!canNext" @click="handleNext">
+            {{ getLabel('hostNext', 'Next') }}
+          </button>
 
 
         </div>
