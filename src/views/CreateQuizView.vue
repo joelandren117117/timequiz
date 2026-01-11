@@ -61,18 +61,6 @@
 
     <section class="question-editor">
       <div class="photo">
-        <div class="question-prompt">
-          <label class="prompt-label" for="question-prompt">
-            {{ getLabel('createQuestionPromptLabel', 'Question prompt') }}
-          </label>
-          <input
-            id="question-prompt"
-            class="prompt-input"
-            v-model.trim="questionPrompt"
-            :placeholder="getLabel('createQuestionPromptPlaceholder', 'Describe the moment in the photo')"
-            maxlength="120"
-          />
-        </div>
         <div class="map-placeholder">
           <template v-if="imageUrl">
             <img
@@ -438,12 +426,6 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-}
-
-.question-prompt {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
 }
 
 .prompt-label {
