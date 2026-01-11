@@ -57,6 +57,11 @@
           </li>
         </ul>
       </div>
+      <GuessTimeline
+        v-if="currentQuestion"
+        :guesses="timelineGuesses"
+        :correct-year="currentQuestion.year"
+      />
     </section>
   </main>
 
@@ -71,6 +76,7 @@ import { computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import AppHeader from '@/components/AppHeader.vue';
 import LeafletMap from '../components/LeafletMap.vue';
+import GuessTimeline from '../components/GuessTimeline.vue';
 import { getLabel } from '@/stores/uiStore';
 import {
   fetchLobby,
@@ -141,6 +147,22 @@ const correctLocation = computed(() => {
     };
   }
   return null;
+});
+
+const currentQuestion = computed(() => {
+  return quiz.value?.questions?.[currentQuestionIndex.value] || null;
+});
+
+const timelineGuesses = computed(() => {
+  return (lobby.value?.guesses || []).map((g) => {
+    const player = players.value.find(p => p.id === g.playerId);
+    return {
+      playerId: g.playerId,
+      name: g.name,
+      year: g.year,
+      playerColor: player?.color?.hex || '#999999',
+    };
+  });
 });
 
 const initialCenter = [54, 15];
