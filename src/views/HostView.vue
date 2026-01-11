@@ -350,12 +350,15 @@ if (!lobby.value) {
   border: 2px solid var(--primary);
   overflow: hidden;
   background: #F7FAF5;
+  position: relative;
+  max-width: 100%;
 }
 
 .map-wrapper :deep(.leaflet-container),
 .map-wrapper :deep(.leaflet-map) {
   height: 100%;
   width: 100%;
+  max-width: 100%;
 }
 
 .host-banner {
