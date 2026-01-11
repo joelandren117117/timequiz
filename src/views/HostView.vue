@@ -12,18 +12,14 @@
     <div class="left-column">
       <section class="host-box">
         <div class="host-grid" role="group" aria-label="Host controls">
-          <button class="host-btn btn btn-secondary" :disabled="!canPrevious" @click="handlePrevious">
-            <span class="tri tri-left" aria-hidden="true"></span>
-            <span class="sr-only">{{ getLabel('hostPrevious', 'Previous') }}</span>
+          <button class="host-btn btn btn-primary" :disabled="!canPrevious" @click="handlePrevious">
+            {{ getLabel('hostPrevious', 'Previous') }}
           </button>
-
-          <button class="big-host-btn btn btn-primary" @click="goToResults">
+          <button class="host-btn btn btn-primary" @click="goToResults">
             {{ getLabel('hostEndGame', 'End Game') }}
           </button>
-
-          <button class="host-btn btn btn-secondary" :disabled="!canNext" @click="handleNext">
-            <span class="tri tri-right" aria-hidden="true"></span>
-            <span class="sr-only">{{ getLabel('hostNext', 'Next') }}</span>
+        <button class="host-btn btn btn-primary" :disabled="!canNext" @click="handleNext">
+            {{ getLabel('hostNext', 'Next') }}
           </button>
 
 
@@ -278,7 +274,7 @@ if (!lobby.value) {
 
 .host-grid {
   display: grid;
-  grid-template-columns: auto 3fr auto;
+  grid-template-columns: 1fr 2fr 1fr;
   gap: 0.75rem;
 }
 
@@ -380,30 +376,14 @@ if (!lobby.value) {
 }
 
 .host-btn{
-  padding: 0;
-  height: 5.25rem;
-  aspect-ratio: 1 / 1;
+  padding: 0.75rem 1rem;
+  height: auto;
+  min-height: 3rem;
   display:flex;
   align-items:center;
   justify-content:center;
-}
-
-.tri{
-  width: 0;
-  height: 0;
-  border-top: 0.9rem solid transparent;
-  border-bottom: 0.9rem solid transparent;
-}
-
-.tri-left{
-  border-right: 1.3rem solid currentColor;
-  margin-right: 5%;
-}
-
-.tri-right{
-  border-left: 1.3rem solid currentColor;
-  margin-left: 5%;
-
+  font-size: clamp(0.7rem, 0.9rem, 1rem);
+  font-weight: 600;
 }
 
 .sr-only {
@@ -420,10 +400,25 @@ if (!lobby.value) {
 @media (max-width: 60em) {
   .layout {
     grid-template-columns: 1fr;
+    padding: 0 1rem 2rem 1rem;
   }
 
   .map-wrapper {
     height: 50vh;
+  }
+
+  .host-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .host-btn {
+    min-height: 2.5rem;
+    font-size: 0.85rem;
+  }
+
+  .host-btn:nth-child(2) {
+    order: -1; /* Move End Game button to top on mobile */
   }
 }
 </style>
