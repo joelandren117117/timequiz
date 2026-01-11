@@ -243,7 +243,7 @@ export default {
   max-width: 1100px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1fr 1.25fr;
+  grid-template-columns: 1.25fr 1fr;
   gap: 2rem;
   align-items: start;
 }
