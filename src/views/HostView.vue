@@ -93,10 +93,9 @@ const questionCount = computed(
 const isFinished = computed(() => lobby.value?.status === 'finished');
 
 // Player color assignment function
-const getPlayerColor = (playerId, playerIndex) => {
+const getPlayerColor = (playerId) => {
   const colors = playerColorsData.colors;
-  const colorIndex = playerIndex % colors.length;
-  return colors[colorIndex];
+  return colors[playerId];
 };
 
 const players = computed(() => {
@@ -105,13 +104,9 @@ const players = computed(() => {
     id: p.id,
     name: p.name,
     points: p.points || 0,
-    color: getPlayerColor(p.id, index),
+    color: getPlayerColor(p.id),
   }))
     .sort((a, b) => b.points - a.points)
-    .map((p, newIndex) => ({
-      ...p,
-      color: getPlayerColor(p.id, newIndex),
-    }));
 });
 const adminMarkers = computed(() =>
   (lobby.value?.guesses || []).map((g) => {

@@ -88,6 +88,7 @@ const sortedGuesses = computed(() => {
   border-radius: 12px;
   padding: 1.5rem;
   margin-top: 1rem;
+  grid-area: timeline;
 }
 
 .timeline-title {
